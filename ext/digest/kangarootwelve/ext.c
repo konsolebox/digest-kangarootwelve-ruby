@@ -143,11 +143,6 @@ static int kangarootwelve_finish(void *ctx, unsigned char *data)
 	}
 }
 
-static VALUE do_nothing(VALUE self)
-{
-	return Qnil;
-}
-
 static VALUE implement(VALUE name, VALUE digest_length, VALUE block_length, VALUE customization)
 {
 	if (!KT_DIGEST_API_VERSION_IS_SUPPORTED(RUBY_DIGEST_API_VERSION))
