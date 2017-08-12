@@ -63,17 +63,17 @@ Or install it yourself as:
 
 ## Details
 
-    For details on how to use the methods, please examine the comments in
-    `ext/digest/kangarootwelve/ext.c`, or try to run
-    `ri 'Digest::KangarooTwelve'` or
-    `ri 'Digest::KangarooTwelve::<method_name>'`.  I'll try to provide a more
-    readable format of the documentation for the API soon.
+For details on how to use the methods, please examine the comments in
+`ext/digest/kangarootwelve/ext.c`, or try to run
+`ri 'Digest::KangarooTwelve'` or
+`ri 'Digest::KangarooTwelve::<method_name>'`.  I'll try to provide a more
+readable format of the documentation for the API soon.
 
-    You can use the implementation classes produced by `[]`, `default` or
-    `implement`, just like any other implementation class in `Digest`
-    (e.g. `Digest::SHA1`, `Digest::SHA512`), since they are also derived from
-    `Digest::Base`, and are programmed to work the way an implementation class
-    that's based on the `Digest` framework should.
+You can use the implementation classes produced by `[]`, `default` or
+`implement`, just like any other implementation class in `Digest`
+(e.g. `Digest::SHA1`, `Digest::SHA512`), since they are also derived from
+`Digest::Base`, and are programmed to work the way an implementation class
+that's based on the `Digest` framework should.
 
 ## Contributing
 
