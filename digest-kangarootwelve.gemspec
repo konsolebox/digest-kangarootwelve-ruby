@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["konsolebox@gmail.com"]
   spec.summary       = "KangarooTwelve for Ruby"
   spec.description   = "An implementation of KangarooTwelve for Ruby that works on top of Digest::Base."
-  spec.homepage      = "https://github.com/konsolebox/digest-kangaootwelve-ruby"
+  spec.homepage      = "https://github.com/konsolebox/digest-kangarootwelve-ruby"
   spec.license       = "MIT"
 
   spec.required_ruby_version = '>= 2.2'
