@@ -1,5 +1,4 @@
 require 'minitest/autorun'
-require 'yaml'
 
 TEST_DIR = File.dirname(__FILE__)
 require File.join(TEST_DIR, %w{ .. lib digest kangarootwelve })
