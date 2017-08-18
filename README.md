@@ -1,6 +1,7 @@
 # digest-kangarootwelve-ruby
 
-An implementation of KangarooTwelve for Ruby that works on top of Digest::Base.
+The digest-kangarootwelve gem is an implementation of KangarooTwelve for Ruby
+that works on top of Digest::Base.
 
 It allows hashing with different digest lengths and different customization
 strings.
@@ -29,26 +30,14 @@ Or install it yourself as:
 
 ## Example Usage
 
-    require 'digest/kangarootwelve'
-    => true
+    Digest::KangarooTwelve[32].digest("abc")
+    => "\xAB\x17O2\x8CU\xA5Q\v\v \x97\x91\xBF\x8B`\xE8\x01\xA7\xCF\xC2\xAAB\x04-\xCB\x8FT\x7F\xBE:}"
 
-    klass = Digest::KangarooTwelve[32]
-    => Digest::KangarooTwelve_32
-
-    hash = klass.new
-    => #<Digest::KangarooTwelve_32:32||1ac2d450fc3b4205d19da7bfca1b37513c0803577ac7167f06fe2ce1f0ef39e5>
-
-    hash.hexdigest("abc")
+    Digest::KangarooTwelve[32].hexdigest("abc")
     => "ab174f328c55a5510b0b209791bf8b60e801a7cfc2aa42042dcb8f547fbe3a7d"
 
-    Digest::KangarooTwelve[32].new.hexdigest("abc")
+    Digest::KangarooTwelve[32].new.update("a").update("b").update("c").hexdigest
     => "ab174f328c55a5510b0b209791bf8b60e801a7cfc2aa42042dcb8f547fbe3a7d"
-
-    Digest::KangarooTwelve.default
-    => Digest::KangarooTwelve_64
-
-    Digest::KangarooTwelve.implement(digest_length: 32, customization: "secret")
-    => Digest::KangarooTwelve_32_736563726574
 
     Digest::KangarooTwelve.implement(name: "SecretHash", digest_length: 32, customization: "secret")
     => Digest::SecretHash
@@ -56,25 +45,25 @@ Or install it yourself as:
     Digest::KangarooTwelve.implement(n: "SecretHash", d: 32, c: "secret")
     => Digest::SecretHash
 
-    Digest::SecretHash.new.hexdigest("abc")
+    Digest::SecretHash.hexdigest("abc")
     => "dc1fd53f85402e2b34fa92bd87593dd9c3fe6cc49d9db6c05dc0cf26c6a7e03f"
 
-    Digest::KangarooTwelve.implement(name: nil, digest_length: 48)
-    => #<Class:0x00000001167208>
+    Digest::KangarooTwelve.default
+    => Digest::KangarooTwelve_64
 
 ## Details
 
-For details on how to use the methods, please examine the comments in
-`ext/digest/kangarootwelve/ext.c`, or try to run
-`ri 'Digest::KangarooTwelve'` or
-`ri 'Digest::KangarooTwelve::<method_name>'`.  I'll try to provide a more
-readable format of the documentation for the API soon.
+The implementation classes produced by `[]`, `default` or
+`implement` can be used just like any other implementation class in `Digest`
+(like `Digest::SHA1` or `Digest::SHA512`), since the implementation classes are
+based on `Digest::Base`.
 
-You can use the implementation classes produced by `[]`, `default` or
-`implement`, just like any other implementation class in `Digest`
-(e.g. `Digest::SHA1`, `Digest::SHA512`), since they are also derived from
-`Digest::Base`, and are programmed to work the way an implementation class
-that's based on the `Digest` framework should.
+For details on how to use these methods, please examine the comments in
+`ext/digest/kangarootwelve/ext.c`, or run `ri` with
+`ri 'Digest::KangarooTwelve'`, or `ri 'Digest::KangarooTwelve::<method_name>'`.
+
+You can also visit the automatically generated API documentation pages provided
+by RubyDoc.info in http://www.rubydoc.info/gems/digest-kangarootwelve/.
 
 ## Contributing
 

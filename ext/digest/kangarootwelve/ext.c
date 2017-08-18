@@ -55,7 +55,6 @@ static ID _id_n;
 static ID _id_unpack;
 
 static VALUE _module_Digest;
-static VALUE _class_Digest_Base;
 static VALUE _module_Digest_KangarooTwelve;
 static VALUE _class_Digest_KangarooTwelve_Impl;
 static VALUE _class_Digest_KangarooTwelve_Metadata;
@@ -269,16 +268,25 @@ static VALUE implement(VALUE name, VALUE digest_length, VALUE customization)
  * Document-module: Digest::KangarooTwelve
  *
  * The Digest::KangarooTwelve module is the main component of the KangarooTwelve
- * extension.
+ * extension for Ruby.
  *
- * To create a hashing object, one must use one of the singleton methods in this
- * module to produce an implementation class, which can then be used to create
- * the hashing object.
+ * It contains singleton methods that can be used to create implementation
+ * classes.  These implementation classes can then be used to create instances
+ * for producing hashes.
  *
- * An example to this is <code>hash = Digest::KangarooTwelve[32].new</code>.
+ * Example:
  *
- * The produced implementation class and the hash object can be used just like
- * any other implementation classes and instances in Digest.
+ * <tt>Digest::KangarooTwelve[32].new.update("one").update("two").digest</tt>
+ *
+ * The implementation classes can also be used to directly produce hashes.
+ *
+ * Example:
+ *
+ * <tt>Digest::KangarooTwelve[32].hexdigest("1234")</tt>
+ *
+ * The produced implementation classes and their instances can be used just like
+ * any other classes and instances in the Digest namespace that's based on
+ * Digest::Base.
  */
 
 /*
@@ -337,7 +345,7 @@ static VALUE rbx_Digest_KangarooTwelve_singleton_default(VALUE self)
  *   Specifies the customization string.  Adding a customization string changes
  *   the resulting digest of every input.
  *
- * Calling the method with no argument would be the same as calling the
+ * Calling the method with no argument is the same as calling the
  * Digest::KangarooTwelve::default method.
  */
 static VALUE rbx_Digest_KangarooTwelve_singleton_implement(int argc, VALUE *argv, VALUE self)
@@ -511,14 +519,13 @@ void Init_kangarootwelve()
 
 	rb_require("digest");
 	_module_Digest = rb_path2class("Digest");
-	_class_Digest_Base = rb_path2class("Digest::Base");
 
 	#if 0
 	_module_Digest = rb_define_module("Digest"); /* Tell RDoc about Digest since it doesn't recognize rb_path2class. */
 	#endif
 
 	/*
-	 * module Digest::KangarooTwelve
+	 * Document-module: Digest::KangarooTwelve
 	 */
 
 	_module_Digest_KangarooTwelve = rb_define_module_under(_module_Digest, "KangarooTwelve");
@@ -531,23 +538,31 @@ void Init_kangarootwelve()
 			rbx_Digest_KangarooTwelve_singleton_implement_simple, 1);
 
 	/*
+	 * Document-const: Digest::KangarooTwelve::BLOCK_LENGTH
+	 *
 	 * 8192 bytes
 	 */
+
+	/* 8192 bytes */
 
 	rb_define_const(_module_Digest_KangarooTwelve, "BLOCK_LENGTH", INT2FIX(KT_BLOCK_LENGTH));
 
 	/*
+	 * Document-const: Digest::KangarooTwelve::DEFAULT_DIGEST_LENGTH
+	 *
 	 * 64 bytes (512 bits)
 	 */
+
+	/* 64 bytes (512 bits) */
 
 	rb_define_const(_module_Digest_KangarooTwelve, "DEFAULT_DIGEST_LENGTH", INT2FIX(KT_DEFAULT_DIGEST_LENGTH));
 
 	/*
-	 * class Digest::KangarooTwelve::Impl < Digest::Base
+	 * Document-class: Digest::KangarooTwelve::Impl
 	 */
 
 	_class_Digest_KangarooTwelve_Impl = rb_define_class_under(_module_Digest_KangarooTwelve, "Impl",
-			_class_Digest_Base);
+			rb_path2class("Digest::Base"));
 
 	rb_define_singleton_method(_class_Digest_KangarooTwelve_Impl, "new",
 			rbx_Digest_KangarooTwelve_Impl_singleton_new, 0);
@@ -564,7 +579,7 @@ void Init_kangarootwelve()
 			rbx_Digest_KangarooTwelve_inspect, 0);
 
 	/*
-	 * class Digest::KangarooTwelve::Metadata < Data
+	 * Document-class: Digest::KangarooTwelve::Metadata
 	 *
 	 * This class represents the internal metadata produced for the
 	 * implementation classes.
