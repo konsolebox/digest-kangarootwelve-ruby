@@ -51,15 +51,19 @@ describe Digest::KangarooTwelve do
 
   it "produces implementations with small and long option names" do
     a = Digest::KangarooTwelve.implement(n: "KangarooTwelveTestA", d: 48, b: 512, c: "abc")
-    b = Digest::KangarooTwelve.implement(name: "KangarooTwelveTestB", digest_length: 48, block_length: 512, customization: "abc")
+    b = Digest::KangarooTwelve.implement(name: "KangarooTwelveTestB", digest_length: 48, customization: "abc")
     a.name.must_equal "Digest::KangarooTwelveTestA"
     b.name.must_equal "Digest::KangarooTwelveTestB"
     a.digest_length.must_equal 48
     a.digest_length.must_equal b.digest_length
-    a.block_length.must_equal 512
-    a.block_length.must_equal b.block_length
     a.customization.must_equal "abc"
     a.customization.must_equal b.customization
+  end
+  
+  it "has a declared block length of 8192 bytes" do
+    Digest::KangarooTwelve::BLOCK_LENGTH == 8192
+    Digest::KangarooTwelve.default.block_length == 8192
+    Digest::KangarooTwelve.default.new.block_length == 8192
   end
 
   it "produces valid hashes" do

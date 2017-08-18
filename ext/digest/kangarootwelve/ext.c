@@ -28,9 +28,8 @@
 #include <ruby/digest.h>
 
 #define KT_DEFAULT_DIGEST_LENGTH 64 /* 512 bits */
-#define KT_DEFAULT_BLOCK_LENGTH 8192 /* chunkSize */
+#define KT_BLOCK_LENGTH 8192 /* chunkSize */
 #define KT_MIN_DIGEST_LENGTH 1
-#define KT_MIN_BLOCK_LENGTH 64
 
 #define KT_DIGEST_API_VERSION_IS_SUPPORTED(version) (version == 3)
 
@@ -73,12 +72,6 @@ static void check_digest_length(int digest_length)
 {
 	if (!(digest_length >= KT_MIN_DIGEST_LENGTH))
 		rb_raise(rb_eArgError, "Digest length lesser than minimum (%d): %d", KT_MIN_DIGEST_LENGTH, digest_length);
-}
-
-static void check_block_length(int block_length)
-{
-	if (!(block_length >= KT_MIN_BLOCK_LENGTH))
-		rb_raise(rb_eArgError, "Block length lesser than minimum (%d): %d", KT_MIN_BLOCK_LENGTH, block_length);
 }
 
 static int kangarootwelve_init(void *ctx)
@@ -143,12 +136,12 @@ static int kangarootwelve_finish(void *ctx, unsigned char *data)
 	}
 }
 
-static VALUE implement(VALUE name, VALUE digest_length, VALUE block_length, VALUE customization)
+static VALUE implement(VALUE name, VALUE digest_length, VALUE customization)
 {
 	if (!KT_DIGEST_API_VERSION_IS_SUPPORTED(RUBY_DIGEST_API_VERSION))
 		rb_raise(rb_eRuntimeError, "Digest API version is not supported.");
 
-	int digest_length_int, block_length_int;
+	int digest_length_int;
 
 	switch (TYPE(digest_length)) {
 	case T_NIL:
@@ -160,18 +153,6 @@ static VALUE implement(VALUE name, VALUE digest_length, VALUE block_length, VALU
 		break;
 	default:
 		rb_raise(rb_eTypeError, "Invalid value type for digest length.");
-	}
-
-	switch (TYPE(block_length)) {
-	case T_NIL:
-		block_length_int = KT_DEFAULT_BLOCK_LENGTH;
-		break;
-	case T_FIXNUM:
-		block_length_int = FIX2INT(block_length);
-		check_block_length(block_length_int);
-		break;
-	default:
-		rb_raise(rb_eTypeError, "Invalid value type for block length.");
 	}
 
 	switch (TYPE(customization)) {
@@ -195,10 +176,7 @@ static VALUE implement(VALUE name, VALUE digest_length, VALUE block_length, VALU
 			if (customization != Qnil) {
 				VALUE customization_hex_in_array = rb_funcall(customization, _id_unpack, 1, rb_str_new_literal("H*"));
 				VALUE customization_hex = rb_ary_pop(customization_hex_in_array);
-				impl_class_name = rb_sprintf("KangarooTwelve_%d_%d_%s", digest_length_int, block_length_int,
-						StringValueCStr(customization_hex));
-			} else if (block_length_int != KT_DEFAULT_BLOCK_LENGTH) {
-				impl_class_name = rb_sprintf("KangarooTwelve_%d_%d", digest_length_int, block_length_int);
+				impl_class_name = rb_sprintf("KangarooTwelve_%d_%s", digest_length_int, StringValueCStr(customization_hex));
 			} else {
 				impl_class_name = rb_sprintf("KangarooTwelve_%d", digest_length_int);
 			}
@@ -261,24 +239,6 @@ static VALUE implement(VALUE name, VALUE digest_length, VALUE block_length, VALU
 						digest_length_int);
 			}
 
-			VALUE prev_block_length = rb_ivar_get(impl_class, _id_block_length);
-
-			if (TYPE(prev_block_length) != T_FIXNUM) {
-				rb_raise(rb_eRuntimeError,
-						"Previous definition of Digest::%s has invalid block length value type.",
-						StringValueCStr(impl_class_name));
-			}
-
-			int prev_block_length_int = FIX2INT(prev_block_length);
-
-			if (prev_block_length_int != block_length_int) {
-				rb_raise(rb_eTypeError,
-						"Digest::%s was already defined but has different block length (%d instead of %d).",
-						StringValueCStr(impl_class_name),
-						prev_block_length_int,
-						block_length_int);
-			}
-
 			return impl_class;
 		}
 
@@ -291,7 +251,7 @@ static VALUE implement(VALUE name, VALUE digest_length, VALUE block_length, VALU
 
 	metadata->api_version = RUBY_DIGEST_API_VERSION;
 	metadata->digest_len = digest_length_int;
-	metadata->block_len = block_length_int;
+	metadata->block_len = KT_BLOCK_LENGTH;
 	metadata->ctx_size = sizeof(KT_CONTEXT);
 	metadata->init_func = kangarootwelve_init;
 	metadata->update_func = kangarootwelve_update;
@@ -299,7 +259,7 @@ static VALUE implement(VALUE name, VALUE digest_length, VALUE block_length, VALU
 
 	rb_ivar_set(impl_class, _id_metadata, metadata_obj);
 	rb_ivar_set(impl_class, _id_digest_length, INT2FIX(digest_length_int));
-	rb_ivar_set(impl_class, _id_block_length, INT2FIX(block_length_int));
+	rb_ivar_set(impl_class, _id_block_length, INT2FIX(KT_BLOCK_LENGTH));
 	rb_ivar_set(impl_class, _id_customization, customization);
 
 	return impl_class;
@@ -332,7 +292,7 @@ static VALUE rbx_Digest_KangarooTwelve_singleton_default(VALUE self)
 	VALUE default_ = rb_ivar_get(self, _id_default);
 
 	if (NIL_P(default_)) {
-		default_ = implement(ID2SYM(_id_auto), INT2FIX(KT_DEFAULT_DIGEST_LENGTH), Qnil, Qnil);
+		default_ = implement(ID2SYM(_id_auto), INT2FIX(KT_DEFAULT_DIGEST_LENGTH), Qnil);
 		rb_ivar_set(self, _id_default, default_);
 	}
 
@@ -355,15 +315,12 @@ static VALUE rbx_Digest_KangarooTwelve_singleton_default(VALUE self)
  *   module.
  *
  *   The default value for this option is +:auto+, and it implies automatic
- *   generation of the name.  The generated name is in the format of
- *   Digest::KangarooTwelve_<digest_length> if neither a customization string
- *   nor a custom block length is specified.
+ *   generation of the name.  The generated name is in the form of
+ *   Digest::KangarooTwelve_<digest_length> if a customization string is not
+ *   specified.
  *
- *   If a customization string is specified, the format would become
- *   Digest::KangarooTwelve_<digest_length>_<block_length>_<cust_str_hex>.
- *
- *   If no customization string is specified but a custom block is, the format
- *   would be Digest::KangarooTwelve_<digest_length>_<block_length>.
+ *   If a customization string is specified, the format would be
+ *   Digest::KangarooTwelve_<digest_length>_<cust_str_hex>.
  *
  *   Specifying a string would make the method produce Digest::<string>.
  *
@@ -376,14 +333,6 @@ static VALUE rbx_Digest_KangarooTwelve_singleton_default(VALUE self)
  *
  *   See Digest::KangarooTwelve::DEFAULT_DIGEST_LENGTH for the default value.
  *
- * :b, :block_length ::
- *   Specifies a custom block length.  This doesn't affect the digest results
- *   and is mostly just used for tweaking performance or memory usage.  Examine
- *   the update function in KangarooTwelve.c to know if this is needed to be
- *   configured.
- *
- *   See Digest::KangarooTwelve::DEFAULT_BLOCK_LENGTH for the default value.
- *
  * :c, :customization ::
  *   Specifies the customization string.  Adding a customization string changes
  *   the resulting digest of every input.
@@ -393,13 +342,13 @@ static VALUE rbx_Digest_KangarooTwelve_singleton_default(VALUE self)
  */
 static VALUE rbx_Digest_KangarooTwelve_singleton_implement(int argc, VALUE *argv, VALUE self)
 {
-	VALUE opts, name, digest_length, block_length, customization;
+	VALUE opts, name, digest_length, customization;
 
 	rb_scan_args(argc, argv, "0:", &opts);
 
 	if (NIL_P(opts)) {
 		name = ID2SYM(_id_auto);
-		digest_length = block_length = customization = Qnil;
+		digest_length = customization = Qnil;
 	} else {
 		name = rb_hash_lookup2(opts, ID2SYM(_id_n), Qundef);
 
@@ -411,18 +360,13 @@ static VALUE rbx_Digest_KangarooTwelve_singleton_implement(int argc, VALUE *argv
 		if (digest_length == Qundef)
 			digest_length = rb_hash_lookup2(opts, ID2SYM(_id_digest_length), Qnil);
 
-		block_length = rb_hash_lookup2(opts, ID2SYM(_id_b), Qundef);
-
-		if (block_length == Qundef)
-			block_length = rb_hash_lookup2(opts, ID2SYM(_id_block_length), Qnil);
-
 		customization = rb_hash_lookup2(opts, ID2SYM(_id_c), Qundef);
 
 		if (customization == Qundef)
 			customization = rb_hash_lookup2(opts, ID2SYM(_id_customization), Qnil);
 	}
 
-	return implement(name, digest_length, block_length, customization);
+	return implement(name, digest_length, customization);
 }
 
 /*
@@ -437,7 +381,7 @@ static VALUE rbx_Digest_KangarooTwelve_singleton_implement(int argc, VALUE *argv
  */
 static VALUE rbx_Digest_KangarooTwelve_singleton_implement_simple(VALUE self, VALUE digest_length)
 {
-	return implement(ID2SYM(_id_auto), digest_length, Qnil, Qnil);
+	return implement(ID2SYM(_id_auto), digest_length, Qnil);
 }
 
 /*
@@ -481,14 +425,11 @@ static VALUE rbx_Digest_KangarooTwelve_Impl_singleton_digest_length(VALUE self)
 /*
  * call-seq: block_length -> int
  *
- * Returns configured block length of the implementation class.
+ * Returns 8192.
  */
 static VALUE rbx_Digest_KangarooTwelve_Impl_singleton_block_length(VALUE self)
 {
-	if (self == _class_Digest_KangarooTwelve_Impl)
-		rb_raise(rb_eRuntimeError, "Digest::KangarooTwelve::Impl is an abstract class.");
-
-	return rb_ivar_get(self, _id_block_length);
+	return INT2FIX(KT_BLOCK_LENGTH);
 }
 
 /*
@@ -527,7 +468,7 @@ static VALUE rbx_Digest_KangarooTwelve_Impl_customization(VALUE self)
 /*
  * call-seq: inspect -> string
  *
- * Returns a string in the format of #<implementation_class_name|digest_length|block_length|customization_string|digest>
+ * Returns a string in the form of #<implementation_class_name|digest_length|customization_string|digest>
  */
 static VALUE rbx_Digest_KangarooTwelve_inspect(VALUE self)
 {
@@ -538,12 +479,11 @@ static VALUE rbx_Digest_KangarooTwelve_inspect(VALUE self)
 		klass_name = rb_inspect(klass);
 
 	VALUE digest_length = rb_funcall(self, _id_digest_length, 0);
-	VALUE block_length = rb_funcall(self, _id_block_length, 0);
 	VALUE customization = rb_funcall(self, _id_customization, 0);
 	VALUE hexdigest = rb_funcall(self, _id_hexdigest, 0);
 
-	VALUE args[] = { klass_name, digest_length, block_length, customization, hexdigest };
-	return rb_str_format(sizeof(args), args, rb_str_new_literal("#<%s|%d|%d|%s|%s>"));
+	VALUE args[] = { klass_name, digest_length, customization, hexdigest };
+	return rb_str_format(sizeof(args), args, rb_str_new_literal("#<%s:%d|%s|%s>"));
 }
 
 /*
@@ -591,10 +531,10 @@ void Init_kangarootwelve()
 			rbx_Digest_KangarooTwelve_singleton_implement_simple, 1);
 
 	/*
-	 * Currently 65536 bytes (8192 x 8)
+	 * 8192 bytes
 	 */
 
-	rb_define_const(_module_Digest_KangarooTwelve, "DEFAULT_BLOCK_LENGTH", INT2FIX(KT_DEFAULT_BLOCK_LENGTH));
+	rb_define_const(_module_Digest_KangarooTwelve, "BLOCK_LENGTH", INT2FIX(KT_BLOCK_LENGTH));
 
 	/*
 	 * 64 bytes (512 bits)

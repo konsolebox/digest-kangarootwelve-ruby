@@ -30,12 +30,13 @@ Or install it yourself as:
 ## Example Usage
 
     require 'digest/kangarootwelve'
+    => true
 
     klass = Digest::KangarooTwelve[32]
     => Digest::KangarooTwelve_32
 
     hash = klass.new
-    => #<Digest::KangarooTwelve_32|32|65536||1ac2d450fc3b4205d19da7bfca1b37513c0803577ac7167f06fe2ce1f0ef39e5>
+    => #<Digest::KangarooTwelve_32:32||1ac2d450fc3b4205d19da7bfca1b37513c0803577ac7167f06fe2ce1f0ef39e5>
 
     hash.hexdigest("abc")
     => "ab174f328c55a5510b0b209791bf8b60e801a7cfc2aa42042dcb8f547fbe3a7d"
@@ -47,7 +48,7 @@ Or install it yourself as:
     => Digest::KangarooTwelve_64
 
     Digest::KangarooTwelve.implement(digest_length: 32, customization: "secret")
-    => Digest::KangarooTwelve_32_65536_736563726574
+    => Digest::KangarooTwelve_32_736563726574
 
     Digest::KangarooTwelve.implement(name: "SecretHash", digest_length: 32, customization: "secret")
     => Digest::SecretHash
@@ -59,7 +60,7 @@ Or install it yourself as:
     => "dc1fd53f85402e2b34fa92bd87593dd9c3fe6cc49d9db6c05dc0cf26c6a7e03f"
 
     Digest::KangarooTwelve.implement(name: nil, digest_length: 48)
-    => #<Class:0x000000015fe8e8>
+    => #<Class:0x00000001167208>
 
 ## Details
 
