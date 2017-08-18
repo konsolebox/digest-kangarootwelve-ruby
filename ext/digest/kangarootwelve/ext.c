@@ -327,7 +327,7 @@ static VALUE implement(VALUE name, VALUE digest_length, VALUE block_length, VALU
  * Returns the default implementation class which has a digest length of 64
  * bytes, and doesn't have a customization string.
  */
-VALUE rbx_Digest_KangarooTwelve_singleton_default(VALUE self)
+static VALUE rbx_Digest_KangarooTwelve_singleton_default(VALUE self)
 {
 	VALUE default_ = rb_ivar_get(self, _id_default);
 
@@ -391,7 +391,7 @@ VALUE rbx_Digest_KangarooTwelve_singleton_default(VALUE self)
  * Calling the method with no argument would be the same as calling the
  * Digest::KangarooTwelve::default method.
  */
-VALUE rbx_Digest_KangarooTwelve_singleton_implement(int argc, VALUE *argv, VALUE self)
+static VALUE rbx_Digest_KangarooTwelve_singleton_implement(int argc, VALUE *argv, VALUE self)
 {
 	VALUE opts, name, digest_length, block_length, customization;
 
@@ -435,7 +435,7 @@ VALUE rbx_Digest_KangarooTwelve_singleton_implement(int argc, VALUE *argv, VALUE
  * Digest::KangarooTwelve_<digest_length>, and can be directly referenced after
  * this method is called.
  */
-VALUE rbx_Digest_KangarooTwelve_singleton_implement_simple(VALUE self, VALUE digest_length)
+static VALUE rbx_Digest_KangarooTwelve_singleton_implement_simple(VALUE self, VALUE digest_length)
 {
 	return implement(ID2SYM(_id_auto), digest_length, Qnil, Qnil);
 }
@@ -454,7 +454,7 @@ VALUE rbx_Digest_KangarooTwelve_singleton_implement_simple(VALUE self, VALUE dig
  *
  * Creates a new object instance of the implementation class.
  */
-VALUE rbx_Digest_KangarooTwelve_Impl_singleton_new(VALUE self)
+static VALUE rbx_Digest_KangarooTwelve_Impl_singleton_new(VALUE self)
 {
 	if (self == _class_Digest_KangarooTwelve_Impl)
 		rb_raise(rb_eRuntimeError, "Digest::KangarooTwelve::Impl is an abstract class.");
@@ -470,7 +470,7 @@ VALUE rbx_Digest_KangarooTwelve_Impl_singleton_new(VALUE self)
  *
  * Returns configured digest length of the implementation class.
  */
-VALUE rbx_Digest_KangarooTwelve_Impl_singleton_digest_length(VALUE self)
+static VALUE rbx_Digest_KangarooTwelve_Impl_singleton_digest_length(VALUE self)
 {
 	if (self == _class_Digest_KangarooTwelve_Impl)
 		rb_raise(rb_eRuntimeError, "Digest::KangarooTwelve::Impl is an abstract class.");
@@ -483,7 +483,7 @@ VALUE rbx_Digest_KangarooTwelve_Impl_singleton_digest_length(VALUE self)
  *
  * Returns configured block length of the implementation class.
  */
-VALUE rbx_Digest_KangarooTwelve_Impl_singleton_block_length(VALUE self)
+static VALUE rbx_Digest_KangarooTwelve_Impl_singleton_block_length(VALUE self)
 {
 	if (self == _class_Digest_KangarooTwelve_Impl)
 		rb_raise(rb_eRuntimeError, "Digest::KangarooTwelve::Impl is an abstract class.");
@@ -496,7 +496,7 @@ VALUE rbx_Digest_KangarooTwelve_Impl_singleton_block_length(VALUE self)
  *
  * Returns configured customization string of the implementation class.
  */
-VALUE rbx_Digest_KangarooTwelve_Impl_singleton_customization(VALUE self)
+static VALUE rbx_Digest_KangarooTwelve_Impl_singleton_customization(VALUE self)
 {
 	if (self == _class_Digest_KangarooTwelve_Impl)
 		rb_raise(rb_eRuntimeError, "Digest::KangarooTwelve::Impl is an abstract class.");
@@ -509,7 +509,7 @@ VALUE rbx_Digest_KangarooTwelve_Impl_singleton_customization(VALUE self)
  *
  * Returns configured customization string of the implementation object.
  */
-VALUE rbx_Digest_KangarooTwelve_Impl_customization(VALUE self)
+static VALUE rbx_Digest_KangarooTwelve_Impl_customization(VALUE self)
 {
 	VALUE customization;
 
@@ -529,7 +529,7 @@ VALUE rbx_Digest_KangarooTwelve_Impl_customization(VALUE self)
  *
  * Returns a string in the format of #<implementation_class_name|digest_length|block_length|customization_string|digest>
  */
-VALUE rbx_Digest_KangarooTwelve_inspect(VALUE self)
+static VALUE rbx_Digest_KangarooTwelve_inspect(VALUE self)
 {
 	VALUE klass = rb_obj_class(self);
 	VALUE klass_name = rb_class_name(klass);
