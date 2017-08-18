@@ -28,7 +28,7 @@
 #include <ruby/digest.h>
 
 #define KT_DEFAULT_DIGEST_LENGTH 64 /* 512 bits */
-#define KT_DEFAULT_BLOCK_LENGTH 8192 * 8 /* chunkSize * Parallellism */
+#define KT_DEFAULT_BLOCK_LENGTH 8192 /* chunkSize */
 #define KT_MIN_DIGEST_LENGTH 1
 #define KT_MIN_BLOCK_LENGTH 64
 
