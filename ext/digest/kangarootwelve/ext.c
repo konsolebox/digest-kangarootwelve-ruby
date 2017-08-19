@@ -23,9 +23,11 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "KangarooTwelve.h"
 #include <ruby.h>
 #include <ruby/digest.h>
+
+#include "KangarooTwelve.h"
+#include "utils.h"
 
 #define KT_DEFAULT_DIGEST_LENGTH 64 /* 512 bits */
 #define KT_BLOCK_LENGTH 8192 /* chunkSize */
@@ -43,7 +45,9 @@ static ID _id_auto;
 static ID _id_block_length;
 static ID _id_b;
 static ID _id_customization;
+static ID _id_customization_hex;
 static ID _id_c;
+static ID _id_ch;
 static ID _id_default;
 static ID _id_digest_length;
 static ID _id_d;
@@ -71,6 +75,27 @@ static void check_digest_length(int digest_length)
 {
 	if (!(digest_length >= KT_MIN_DIGEST_LENGTH))
 		rb_raise(rb_eArgError, "Digest length lesser than minimum (%d): %d", KT_MIN_DIGEST_LENGTH, digest_length);
+}
+
+static VALUE hex_encode_str(VALUE str)
+{
+	int len = RSTRING_LEN(str);
+	VALUE hex = rb_str_new(0, len * 2);
+	hex_encode_str_implied(RSTRING_PTR(str), len, RSTRING_PTR(hex));
+	return hex;
+}
+
+static VALUE hex_decode_str(VALUE str)
+{
+	int len = RSTRING_LEN(str);
+	VALUE decoded = rb_str_new(0, calc_hex_decoded_str_length(len));
+
+	if (! hex_decode_str_implied(RSTRING_PTR(str), len, RSTRING_PTR(decoded))) {
+		VALUE inspect = rb_inspect(str);
+		rb_raise(rb_eArgError, "Failed to decode hex string %s.", RSTRING_PTR(inspect));
+	}
+
+	return decoded;
 }
 
 static int kangarootwelve_init(void *ctx)
@@ -173,9 +198,7 @@ static VALUE implement(VALUE name, VALUE digest_length, VALUE customization)
 
 		if (id == _id_auto) {
 			if (customization != Qnil) {
-				VALUE customization_hex_in_array = rb_funcall(customization, _id_unpack, 1, rb_str_new_literal("H*"));
-				VALUE customization_hex = rb_ary_pop(customization_hex_in_array);
-				impl_class_name = rb_sprintf("KangarooTwelve_%d_%s", digest_length_int, StringValueCStr(customization_hex));
+				impl_class_name = hex_encode_str(customization);
 			} else {
 				impl_class_name = rb_sprintf("KangarooTwelve_%d", digest_length_int);
 			}
@@ -345,6 +368,9 @@ static VALUE rbx_Digest_KangarooTwelve_singleton_default(VALUE self)
  *   Specifies the customization string.  Adding a customization string changes
  *   the resulting digest of every input.
  *
+ * :ch, :customization_hex ::
+ *   Specifies the customization string in hex mode.
+ *
  * Calling the method with no argument is the same as calling the
  * Digest::KangarooTwelve::default method.
  */
@@ -371,7 +397,23 @@ static VALUE rbx_Digest_KangarooTwelve_singleton_implement(int argc, VALUE *argv
 		customization = rb_hash_lookup2(opts, ID2SYM(_id_c), Qundef);
 
 		if (customization == Qundef)
-			customization = rb_hash_lookup2(opts, ID2SYM(_id_customization), Qnil);
+			customization = rb_hash_lookup2(opts, ID2SYM(_id_customization), Qundef);
+
+		if (customization == Qundef) {
+			VALUE customization_hex = rb_hash_lookup2(opts, ID2SYM(_id_customization_hex), Qundef);
+
+			if (customization_hex == Qundef)
+				customization_hex = rb_hash_lookup2(opts, ID2SYM(_id_ch), Qundef);
+
+			if (customization_hex == Qundef) {
+				customization = Qnil;
+			} else {
+				if (TYPE(customization_hex) != T_STRING)
+					rb_raise(rb_eTypeError, "Customization argument not a string.");
+
+				customization = hex_decode_str(customization_hex);
+			}
+		}
 	}
 
 	return implement(name, digest_length, customization);
@@ -454,6 +496,20 @@ static VALUE rbx_Digest_KangarooTwelve_Impl_singleton_customization(VALUE self)
 }
 
 /*
+ * call-seq: customization_hex -> string or nil
+ *
+ * Returns configured customization string of the implementation class in hex.
+ */
+static VALUE rbx_Digest_KangarooTwelve_Impl_singleton_customization_hex(VALUE self)
+{
+	if (self == _class_Digest_KangarooTwelve_Impl)
+		rb_raise(rb_eRuntimeError, "Digest::KangarooTwelve::Impl is an abstract class.");
+
+	VALUE customization = rb_ivar_get(self, _id_customization);
+	return hex_encode_str(customization);
+}
+
+/*
  * call-seq: customization -> string or nil
  *
  * Returns configured customization string of the implementation object.
@@ -474,11 +530,22 @@ static VALUE rbx_Digest_KangarooTwelve_Impl_customization(VALUE self)
 }
 
 /*
+ * call-seq: customization_hex -> string or nil
+ *
+ * Returns configured customization string of the implementation object in hex.
+ */
+static VALUE rbx_Digest_KangarooTwelve_Impl_customization_hex(VALUE self)
+{
+	VALUE customization = rb_funcall(self, _id_customization, 0);
+	return hex_encode_str(customization);
+}
+
+/*
  * call-seq: inspect -> string
  *
- * Returns a string in the form of #<implementation_class_name|digest_length|customization_string|digest>
+ * Returns a string in the form of #<impl_class_name|digest_length|hex_cust_string|hex_digest>
  */
-static VALUE rbx_Digest_KangarooTwelve_inspect(VALUE self)
+static VALUE rbx_Digest_KangarooTwelve_Impl_inspect(VALUE self)
 {
 	VALUE klass = rb_obj_class(self);
 	VALUE klass_name = rb_class_name(klass);
@@ -487,10 +554,10 @@ static VALUE rbx_Digest_KangarooTwelve_inspect(VALUE self)
 		klass_name = rb_inspect(klass);
 
 	VALUE digest_length = rb_funcall(self, _id_digest_length, 0);
-	VALUE customization = rb_funcall(self, _id_customization, 0);
+	VALUE customization_hex = rb_funcall(self, _id_customization_hex, 0);
 	VALUE hexdigest = rb_funcall(self, _id_hexdigest, 0);
 
-	VALUE args[] = { klass_name, digest_length, customization, hexdigest };
+	VALUE args[] = { klass_name, digest_length, customization_hex, hexdigest };
 	return rb_str_format(sizeof(args), args, rb_str_new_literal("#<%s:%d|%s|%s>"));
 }
 
@@ -505,7 +572,9 @@ void Init_kangarootwelve()
 	DEFINE_ID(auto)
 	DEFINE_ID(block_length)
 	DEFINE_ID(b)
+	DEFINE_ID(ch)
 	DEFINE_ID(customization)
+	DEFINE_ID(customization_hex)
 	DEFINE_ID(c)
 	DEFINE_ID(default)
 	DEFINE_ID(digest_length)
@@ -572,11 +641,15 @@ void Init_kangarootwelve()
 			rbx_Digest_KangarooTwelve_Impl_singleton_digest_length, 0);
 	rb_define_singleton_method(_class_Digest_KangarooTwelve_Impl, "customization",
 			rbx_Digest_KangarooTwelve_Impl_singleton_customization, 0);
+	rb_define_singleton_method(_class_Digest_KangarooTwelve_Impl, "customization_hex",
+			rbx_Digest_KangarooTwelve_Impl_singleton_customization_hex, 0);
 
 	rb_define_method(_class_Digest_KangarooTwelve_Impl, "customization",
 			rbx_Digest_KangarooTwelve_Impl_customization, 0);
+	rb_define_method(_class_Digest_KangarooTwelve_Impl, "customization_hex",
+			rbx_Digest_KangarooTwelve_Impl_customization_hex, 0);
 	rb_define_method(_class_Digest_KangarooTwelve_Impl, "inspect",
-			rbx_Digest_KangarooTwelve_inspect, 0);
+			rbx_Digest_KangarooTwelve_Impl_inspect, 0);
 
 	/*
 	 * Document-class: Digest::KangarooTwelve::Metadata

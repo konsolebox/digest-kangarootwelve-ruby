@@ -46,20 +46,24 @@ describe Digest::KangarooTwelve do
   end
 
   it "works with customization strings" do
-    Digest::KangarooTwelve.implement(customization: "abc").new.digest("")
+    Digest::KangarooTwelve.implement(customization: "abcd").new.digest("")
   end
 
   it "produces implementations with small and long option names" do
-    a = Digest::KangarooTwelve.implement(n: "KangarooTwelveTestA", d: 48, b: 512, c: "abc")
-    b = Digest::KangarooTwelve.implement(name: "KangarooTwelveTestB", digest_length: 48, customization: "abc")
+    a = Digest::KangarooTwelve.implement(n: "KangarooTwelveTestA", d: 48, c: "abcd")
+    b = Digest::KangarooTwelve.implement(name: "KangarooTwelveTestB", digest_length: 48, customization: "abcd")
+    c = Digest::KangarooTwelve.implement(name: "KangarooTwelveTestC", digest_length: 48, customization_hex: "61626364")
+    d = Digest::KangarooTwelve.implement(name: "KangarooTwelveTestD", digest_length: 48, ch: "61626364")
     a.name.must_equal "Digest::KangarooTwelveTestA"
     b.name.must_equal "Digest::KangarooTwelveTestB"
     a.digest_length.must_equal 48
-    a.digest_length.must_equal b.digest_length
-    a.customization.must_equal "abc"
-    a.customization.must_equal b.customization
+    b.digest_length.must_equal a.digest_length
+    a.customization.must_equal "abcd"
+    b.customization.must_equal a.customization
+    c.customization.must_equal a.customization
+    d.customization.must_equal a.customization
   end
-  
+
   it "has a declared block length of 8192 bytes" do
     Digest::KangarooTwelve::BLOCK_LENGTH == 8192
     Digest::KangarooTwelve.default.block_length == 8192
