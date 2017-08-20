@@ -16,6 +16,10 @@ def get_repeated_0xff(length)
   [str].cycle(cycles).to_a.join[0...length]
 end
 
+def hex_encode(str)
+  str.unpack('H*').pop
+end
+
 describe Digest::KangarooTwelve do
   it "produces implementation classes" do
     Digest::KangarooTwelve[32].superclass.must_equal Digest::KangarooTwelve::Impl
@@ -41,8 +45,25 @@ describe Digest::KangarooTwelve do
     Digest::KangarooTwelve.implement(digest_length: 48).new.digest_length.must_equal Digest::KangarooTwelve_48.digest_length
   end
 
-  it "produces a hash" do
-    Digest::KangarooTwelve.default.new.digest("")
+  it "produces hashes" do
+    Digest::KangarooTwelve.default.digest("").class.must_equal String
+    Digest::KangarooTwelve.default.hexdigest("").class.must_equal String
+    Digest::KangarooTwelve.default.new.digest("").class.must_equal String
+    Digest::KangarooTwelve.default.new.hexdigest("").class.must_equal String
+  end
+
+  it "produces similar output with its digest and hexdigest methods" do
+    digest_a = Digest::KangarooTwelve[32].digest("abcd")
+    digest_a.class.must_equal String
+    digest_b = Digest::KangarooTwelve[32].new.digest("abcd")
+    digest_b.class.must_equal String
+    digest_a.must_equal digest_b
+    hex_digest_a = Digest::KangarooTwelve[32].hexdigest("abcd")
+    hex_digest_a.class.must_equal String
+    hex_digest_b = Digest::KangarooTwelve[32].new.hexdigest("abcd")
+    hex_digest_b.class.must_equal String
+    hex_digest_a.must_equal hex_digest_b
+    hex_digest_a.must_equal hex_encode(digest_a)
   end
 
   it "works with customization strings" do
