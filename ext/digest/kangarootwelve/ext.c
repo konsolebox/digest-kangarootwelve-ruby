@@ -58,10 +58,10 @@ static ID _id_new;
 static ID _id_n;
 static ID _id_unpack;
 
-static VALUE _module_Digest;
-static VALUE _module_Digest_KangarooTwelve;
-static VALUE _class_Digest_KangarooTwelve_Impl;
-static VALUE _class_Digest_KangarooTwelve_Metadata;
+static VALUE _Digest;
+static VALUE _Digest_KangarooTwelve;
+static VALUE _Digest_KangarooTwelve_Impl;
+static VALUE _Digest_KangarooTwelve_Metadata;
 
 typedef struct {
 	KangarooTwelve_Instance instance;
@@ -105,7 +105,7 @@ static int kangarootwelve_init(void *ctx)
 
 	VALUE klass_or_instance = rb_current_receiver();
 
-	if (TYPE(klass_or_instance) == T_CLASS && klass_or_instance == _class_Digest_KangarooTwelve_Impl)
+	if (TYPE(klass_or_instance) == T_CLASS && klass_or_instance == _Digest_KangarooTwelve_Impl)
 		rb_raise(rb_eStandardError, "Digest::KangarooTwelve::Impl is a base class and cannot be instantiated.");
 
 	VALUE digest_length = rb_funcall(klass_or_instance, _id_digest_length, 0);
@@ -226,10 +226,10 @@ static VALUE implement(VALUE name, VALUE digest_length, VALUE customization)
 	VALUE impl_class;
 
 	if (impl_class_name == Qnil) {
-		impl_class = rb_funcall(rb_cClass, _id_new, 1, _class_Digest_KangarooTwelve_Impl);
+		impl_class = rb_funcall(rb_cClass, _id_new, 1, _Digest_KangarooTwelve_Impl);
 	} else {
-		if (rb_const_defined(_module_Digest, impl_class_name_id)) {
-			impl_class = rb_const_get(_module_Digest, impl_class_name_id);
+		if (rb_const_defined(_Digest, impl_class_name_id)) {
+			impl_class = rb_const_get(_Digest, impl_class_name_id);
 
 			if (TYPE(impl_class) != T_CLASS) {
 				rb_raise(rb_eTypeError,
@@ -237,7 +237,7 @@ static VALUE implement(VALUE name, VALUE digest_length, VALUE customization)
 						StringValueCStr(impl_class_name));
 			}
 
-			if (rb_class_superclass(impl_class) != _class_Digest_KangarooTwelve_Impl) {
+			if (rb_class_superclass(impl_class) != _Digest_KangarooTwelve_Impl) {
 				rb_raise(rb_eTypeError,
 						"Digest::%s was already defined but not derived from Digest::KangarooTwelve::Impl.",
 						StringValueCStr(impl_class_name));
@@ -264,12 +264,12 @@ static VALUE implement(VALUE name, VALUE digest_length, VALUE customization)
 			return impl_class;
 		}
 
-		impl_class = rb_define_class_id_under(_module_Digest, impl_class_name_id, _class_Digest_KangarooTwelve_Impl);
+		impl_class = rb_define_class_id_under(_Digest, impl_class_name_id, _Digest_KangarooTwelve_Impl);
 	}
 
 	VALUE metadata_obj;
 	rb_digest_metadata_t *metadata;
-	metadata_obj = Data_Make_Struct(_class_Digest_KangarooTwelve_Metadata, rb_digest_metadata_t, 0, -1, metadata);
+	metadata_obj = Data_Make_Struct(_Digest_KangarooTwelve_Metadata, rb_digest_metadata_t, 0, -1, metadata);
 
 	metadata->api_version = RUBY_DIGEST_API_VERSION;
 	metadata->digest_len = digest_length_int;
@@ -318,7 +318,7 @@ static VALUE implement(VALUE name, VALUE digest_length, VALUE customization)
  * Returns the default implementation class which has a digest length of 64
  * bytes, and doesn't have a customization string.
  */
-static VALUE rbx_Digest_KangarooTwelve_singleton_default(VALUE self)
+static VALUE _Digest_KangarooTwelve_singleton_default(VALUE self)
 {
 	VALUE default_ = rb_ivar_get(self, _id_default);
 
@@ -374,7 +374,7 @@ static VALUE rbx_Digest_KangarooTwelve_singleton_default(VALUE self)
  * Calling the method with no argument is the same as calling the
  * Digest::KangarooTwelve::default method.
  */
-static VALUE rbx_Digest_KangarooTwelve_singleton_implement(int argc, VALUE *argv, VALUE self)
+static VALUE _Digest_KangarooTwelve_singleton_implement(int argc, VALUE *argv, VALUE self)
 {
 	VALUE opts, name, digest_length, customization;
 
@@ -429,7 +429,7 @@ static VALUE rbx_Digest_KangarooTwelve_singleton_implement(int argc, VALUE *argv
  * Digest::KangarooTwelve_<digest_length>, and can be directly referenced after
  * this method is called.
  */
-static VALUE rbx_Digest_KangarooTwelve_singleton_implement_simple(VALUE self, VALUE digest_length)
+static VALUE _Digest_KangarooTwelve_singleton_implement_simple(VALUE self, VALUE digest_length)
 {
 	return implement(ID2SYM(_id_auto), digest_length, Qnil);
 }
@@ -448,12 +448,12 @@ static VALUE rbx_Digest_KangarooTwelve_singleton_implement_simple(VALUE self, VA
  *
  * Creates a new object instance of the implementation class.
  */
-static VALUE rbx_Digest_KangarooTwelve_Impl_singleton_new(VALUE self)
+static VALUE _Digest_KangarooTwelve_Impl_singleton_new(VALUE self)
 {
-	if (self == _class_Digest_KangarooTwelve_Impl)
+	if (self == _Digest_KangarooTwelve_Impl)
 		rb_raise(rb_eRuntimeError, "Digest::KangarooTwelve::Impl is an abstract class.");
 
-	if (rb_obj_class(rb_ivar_get(self, _id_metadata)) != _class_Digest_KangarooTwelve_Metadata)
+	if (rb_obj_class(rb_ivar_get(self, _id_metadata)) != _Digest_KangarooTwelve_Metadata)
 		rb_raise(rb_eRuntimeError, "Metadata not set or invalid.  Please do not manually inherit KangarooTwelve.");
 
 	return rb_call_super(0, 0);
@@ -464,9 +464,9 @@ static VALUE rbx_Digest_KangarooTwelve_Impl_singleton_new(VALUE self)
  *
  * Returns configured digest length of the implementation class.
  */
-static VALUE rbx_Digest_KangarooTwelve_Impl_singleton_digest_length(VALUE self)
+static VALUE _Digest_KangarooTwelve_Impl_singleton_digest_length(VALUE self)
 {
-	if (self == _class_Digest_KangarooTwelve_Impl)
+	if (self == _Digest_KangarooTwelve_Impl)
 		rb_raise(rb_eRuntimeError, "Digest::KangarooTwelve::Impl is an abstract class.");
 
 	return rb_ivar_get(self, _id_digest_length);
@@ -477,7 +477,7 @@ static VALUE rbx_Digest_KangarooTwelve_Impl_singleton_digest_length(VALUE self)
  *
  * Returns 8192.
  */
-static VALUE rbx_Digest_KangarooTwelve_Impl_singleton_block_length(VALUE self)
+static VALUE _Digest_KangarooTwelve_Impl_singleton_block_length(VALUE self)
 {
 	return INT2FIX(KT_BLOCK_LENGTH);
 }
@@ -487,9 +487,9 @@ static VALUE rbx_Digest_KangarooTwelve_Impl_singleton_block_length(VALUE self)
  *
  * Returns configured customization string of the implementation class.
  */
-static VALUE rbx_Digest_KangarooTwelve_Impl_singleton_customization(VALUE self)
+static VALUE _Digest_KangarooTwelve_Impl_singleton_customization(VALUE self)
 {
-	if (self == _class_Digest_KangarooTwelve_Impl)
+	if (self == _Digest_KangarooTwelve_Impl)
 		rb_raise(rb_eRuntimeError, "Digest::KangarooTwelve::Impl is an abstract class.");
 
 	return rb_ivar_get(self, _id_customization);
@@ -500,9 +500,9 @@ static VALUE rbx_Digest_KangarooTwelve_Impl_singleton_customization(VALUE self)
  *
  * Returns configured customization string of the implementation class in hex.
  */
-static VALUE rbx_Digest_KangarooTwelve_Impl_singleton_customization_hex(VALUE self)
+static VALUE _Digest_KangarooTwelve_Impl_singleton_customization_hex(VALUE self)
 {
-	if (self == _class_Digest_KangarooTwelve_Impl)
+	if (self == _Digest_KangarooTwelve_Impl)
 		rb_raise(rb_eRuntimeError, "Digest::KangarooTwelve::Impl is an abstract class.");
 
 	VALUE customization = rb_ivar_get(self, _id_customization);
@@ -514,7 +514,7 @@ static VALUE rbx_Digest_KangarooTwelve_Impl_singleton_customization_hex(VALUE se
  *
  * Returns configured customization string of the implementation object.
  */
-static VALUE rbx_Digest_KangarooTwelve_Impl_customization(VALUE self)
+static VALUE _Digest_KangarooTwelve_Impl_customization(VALUE self)
 {
 	VALUE customization;
 
@@ -534,7 +534,7 @@ static VALUE rbx_Digest_KangarooTwelve_Impl_customization(VALUE self)
  *
  * Returns configured customization string of the implementation object in hex.
  */
-static VALUE rbx_Digest_KangarooTwelve_Impl_customization_hex(VALUE self)
+static VALUE _Digest_KangarooTwelve_Impl_customization_hex(VALUE self)
 {
 	VALUE customization = rb_funcall(self, _id_customization, 0);
 	return hex_encode_str(customization);
@@ -545,7 +545,7 @@ static VALUE rbx_Digest_KangarooTwelve_Impl_customization_hex(VALUE self)
  *
  * Returns a string in the form of #<impl_class_name|digest_length|hex_cust_string|hex_digest>
  */
-static VALUE rbx_Digest_KangarooTwelve_Impl_inspect(VALUE self)
+static VALUE _Digest_KangarooTwelve_Impl_inspect(VALUE self)
 {
 	VALUE klass = rb_obj_class(self);
 	VALUE klass_name = rb_class_name(klass);
@@ -587,24 +587,24 @@ void Init_kangarootwelve()
 	DEFINE_ID(unpack)
 
 	rb_require("digest");
-	_module_Digest = rb_path2class("Digest");
+	_Digest = rb_path2class("Digest");
 
 	#if 0
-	_module_Digest = rb_define_module("Digest"); /* Tell RDoc about Digest since it doesn't recognize rb_path2class. */
+	_Digest = rb_define_module("Digest"); /* Tell RDoc about Digest since it doesn't recognize rb_path2class. */
 	#endif
 
 	/*
 	 * Document-module: Digest::KangarooTwelve
 	 */
 
-	_module_Digest_KangarooTwelve = rb_define_module_under(_module_Digest, "KangarooTwelve");
+	_Digest_KangarooTwelve = rb_define_module_under(_Digest, "KangarooTwelve");
 
-	rb_define_singleton_method(_module_Digest_KangarooTwelve, "default",
-			rbx_Digest_KangarooTwelve_singleton_default, 0);
-	rb_define_singleton_method(_module_Digest_KangarooTwelve, "implement",
-			rbx_Digest_KangarooTwelve_singleton_implement, -1);
-	rb_define_singleton_method(_module_Digest_KangarooTwelve, "[]",
-			rbx_Digest_KangarooTwelve_singleton_implement_simple, 1);
+	rb_define_singleton_method(_Digest_KangarooTwelve, "default",
+			_Digest_KangarooTwelve_singleton_default, 0);
+	rb_define_singleton_method(_Digest_KangarooTwelve, "implement",
+			_Digest_KangarooTwelve_singleton_implement, -1);
+	rb_define_singleton_method(_Digest_KangarooTwelve, "[]",
+			_Digest_KangarooTwelve_singleton_implement_simple, 1);
 
 	/*
 	 * Document-const: Digest::KangarooTwelve::BLOCK_LENGTH
@@ -614,7 +614,7 @@ void Init_kangarootwelve()
 
 	/* 8192 bytes */
 
-	rb_define_const(_module_Digest_KangarooTwelve, "BLOCK_LENGTH", INT2FIX(KT_BLOCK_LENGTH));
+	rb_define_const(_Digest_KangarooTwelve, "BLOCK_LENGTH", INT2FIX(KT_BLOCK_LENGTH));
 
 	/*
 	 * Document-const: Digest::KangarooTwelve::DEFAULT_DIGEST_LENGTH
@@ -624,32 +624,32 @@ void Init_kangarootwelve()
 
 	/* 64 bytes (512 bits) */
 
-	rb_define_const(_module_Digest_KangarooTwelve, "DEFAULT_DIGEST_LENGTH", INT2FIX(KT_DEFAULT_DIGEST_LENGTH));
+	rb_define_const(_Digest_KangarooTwelve, "DEFAULT_DIGEST_LENGTH", INT2FIX(KT_DEFAULT_DIGEST_LENGTH));
 
 	/*
 	 * Document-class: Digest::KangarooTwelve::Impl
 	 */
 
-	_class_Digest_KangarooTwelve_Impl = rb_define_class_under(_module_Digest_KangarooTwelve, "Impl",
+	_Digest_KangarooTwelve_Impl = rb_define_class_under(_Digest_KangarooTwelve, "Impl",
 			rb_path2class("Digest::Base"));
 
-	rb_define_singleton_method(_class_Digest_KangarooTwelve_Impl, "new",
-			rbx_Digest_KangarooTwelve_Impl_singleton_new, 0);
-	rb_define_singleton_method(_class_Digest_KangarooTwelve_Impl, "block_length",
-			rbx_Digest_KangarooTwelve_Impl_singleton_block_length, 0);
-	rb_define_singleton_method(_class_Digest_KangarooTwelve_Impl, "digest_length",
-			rbx_Digest_KangarooTwelve_Impl_singleton_digest_length, 0);
-	rb_define_singleton_method(_class_Digest_KangarooTwelve_Impl, "customization",
-			rbx_Digest_KangarooTwelve_Impl_singleton_customization, 0);
-	rb_define_singleton_method(_class_Digest_KangarooTwelve_Impl, "customization_hex",
-			rbx_Digest_KangarooTwelve_Impl_singleton_customization_hex, 0);
+	rb_define_singleton_method(_Digest_KangarooTwelve_Impl, "new",
+			_Digest_KangarooTwelve_Impl_singleton_new, 0);
+	rb_define_singleton_method(_Digest_KangarooTwelve_Impl, "block_length",
+			_Digest_KangarooTwelve_Impl_singleton_block_length, 0);
+	rb_define_singleton_method(_Digest_KangarooTwelve_Impl, "digest_length",
+			_Digest_KangarooTwelve_Impl_singleton_digest_length, 0);
+	rb_define_singleton_method(_Digest_KangarooTwelve_Impl, "customization",
+			_Digest_KangarooTwelve_Impl_singleton_customization, 0);
+	rb_define_singleton_method(_Digest_KangarooTwelve_Impl, "customization_hex",
+			_Digest_KangarooTwelve_Impl_singleton_customization_hex, 0);
 
-	rb_define_method(_class_Digest_KangarooTwelve_Impl, "customization",
-			rbx_Digest_KangarooTwelve_Impl_customization, 0);
-	rb_define_method(_class_Digest_KangarooTwelve_Impl, "customization_hex",
-			rbx_Digest_KangarooTwelve_Impl_customization_hex, 0);
-	rb_define_method(_class_Digest_KangarooTwelve_Impl, "inspect",
-			rbx_Digest_KangarooTwelve_Impl_inspect, 0);
+	rb_define_method(_Digest_KangarooTwelve_Impl, "customization",
+			_Digest_KangarooTwelve_Impl_customization, 0);
+	rb_define_method(_Digest_KangarooTwelve_Impl, "customization_hex",
+			_Digest_KangarooTwelve_Impl_customization_hex, 0);
+	rb_define_method(_Digest_KangarooTwelve_Impl, "inspect",
+			_Digest_KangarooTwelve_Impl_inspect, 0);
 
 	/*
 	 * Document-class: Digest::KangarooTwelve::Metadata
@@ -658,6 +658,6 @@ void Init_kangarootwelve()
 	 * implementation classes.
 	 */
 
-	_class_Digest_KangarooTwelve_Metadata = rb_define_class_under(_module_Digest_KangarooTwelve, "Metadata",
+	_Digest_KangarooTwelve_Metadata = rb_define_class_under(_Digest_KangarooTwelve, "Metadata",
 			rb_path2class("Data"));
 }
