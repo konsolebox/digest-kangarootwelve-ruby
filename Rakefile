@@ -11,10 +11,4 @@ Rake::TestTask.new do |t|
   t.verbose = true
 end
 
-# clean
-task :clean do
-  list = FileList.new('test/*.tmp', 'test/*.temp')
-  rm_f list unless list.empty?
-end
-
 # Run `rake --tasks` for a list of tasks.
