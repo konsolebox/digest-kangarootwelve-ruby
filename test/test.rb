@@ -86,9 +86,9 @@ describe Digest::KangarooTwelve do
   end
 
   it "has a declared block length of 8192 bytes" do
-    Digest::KangarooTwelve::BLOCK_LENGTH == 8192
-    Digest::KangarooTwelve.default.block_length == 8192
-    Digest::KangarooTwelve.default.new.block_length == 8192
+    Digest::KangarooTwelve::BLOCK_LENGTH.must_equal 8192
+    Digest::KangarooTwelve.default.block_length.must_equal 8192
+    Digest::KangarooTwelve.default.new.block_length.must_equal 8192
   end
 
   it "produces valid hashes" do
