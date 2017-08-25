@@ -320,7 +320,10 @@ static VALUE implement(VALUE name, VALUE digest_length, VALUE customization)
  */
 static VALUE _Digest_KangarooTwelve_singleton_default(VALUE self)
 {
-	VALUE default_ = rb_ivar_get(self, _id_default);
+	VALUE default_ = Qnil;
+
+	if (rb_ivar_defined(self, _id_default) == Qtrue)
+		default_ = rb_ivar_get(self, _id_default);
 
 	if (NIL_P(default_)) {
 		default_ = implement(ID2SYM(_id_auto), INT2FIX(KT_DEFAULT_DIGEST_LENGTH), Qnil);
@@ -453,7 +456,7 @@ static VALUE _Digest_KangarooTwelve_Impl_singleton_new(VALUE self)
 	if (self == _Digest_KangarooTwelve_Impl)
 		rb_raise(rb_eRuntimeError, "Digest::KangarooTwelve::Impl is an abstract class.");
 
-	if (rb_obj_class(rb_ivar_get(self, _id_metadata)) != _Digest_KangarooTwelve_Metadata)
+	if (rb_ivar_defined(self, _id_metadata) == Qfalse || rb_obj_class(rb_ivar_get(self, _id_metadata)) != _Digest_KangarooTwelve_Metadata)
 		rb_raise(rb_eRuntimeError, "Metadata not set or invalid.  Please do not manually inherit KangarooTwelve.");
 
 	return rb_call_super(0, 0);
@@ -492,7 +495,7 @@ static VALUE _Digest_KangarooTwelve_Impl_singleton_customization(VALUE self)
 	if (self == _Digest_KangarooTwelve_Impl)
 		rb_raise(rb_eRuntimeError, "Digest::KangarooTwelve::Impl is an abstract class.");
 
-	return rb_ivar_get(self, _id_customization);
+	return rb_ivar_defined(self, _id_customization) == Qtrue ? rb_ivar_get(self, _id_customization) : Qnil;
 }
 
 /*
@@ -505,8 +508,18 @@ static VALUE _Digest_KangarooTwelve_Impl_singleton_customization_hex(VALUE self)
 	if (self == _Digest_KangarooTwelve_Impl)
 		rb_raise(rb_eRuntimeError, "Digest::KangarooTwelve::Impl is an abstract class.");
 
-	VALUE customization = rb_ivar_get(self, _id_customization);
-	return hex_encode_str(customization);
+	if (rb_ivar_defined(self, _id_customization)) {
+		VALUE customization = rb_ivar_get(self, _id_customization);
+
+		if (!NIL_P(customization)) {
+			if (TYPE(customization) != T_STRING)
+				rb_raise(rb_eTypeError, "Unexpected class for a customization string.");
+
+			return hex_encode_str(customization);
+		}
+	}
+
+	return Qnil;
 }
 
 /*
