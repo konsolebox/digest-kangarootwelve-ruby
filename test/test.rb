@@ -85,6 +85,15 @@ describe Digest::KangarooTwelve do
     d.customization.must_equal a.customization
   end
 
+  it "has a customization method that returns nil when customization string is undefined" do
+    Digest::KangarooTwelve.implement.customization.must_be_nil
+  end
+
+  it "has a customization_hex method that returns hex of customization string, or nil" do
+    Digest::KangarooTwelve.implement(c: "abcd").customization_hex.must_equal "61626364"
+    Digest::KangarooTwelve.implement.customization_hex.must_be_nil
+  end
+
   it "has a declared block length of 8192 bytes" do
     Digest::KangarooTwelve::BLOCK_LENGTH.must_equal 8192
     Digest::KangarooTwelve.default.block_length.must_equal 8192
