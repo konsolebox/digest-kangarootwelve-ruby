@@ -672,5 +672,5 @@ void Init_kangarootwelve()
 	 */
 
 	_Digest_KangarooTwelve_Metadata = rb_define_class_under(_Digest_KangarooTwelve, "Metadata",
-			rb_path2class("Data"));
+			rb_cObject);
 }
