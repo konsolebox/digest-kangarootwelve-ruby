@@ -7,7 +7,7 @@ Rake::ExtensionTask.new('digest/kangarootwelve', Bundler::GemHelper.gemspec)
 
 # test
 require 'rake/testtask'
-Rake::TestTask.new do |t|
+Rake::TestTask.new(:test => :compile) do |t|
   t.test_files = FileList['test/test.rb']
   t.verbose = true
 end
