@@ -74,3 +74,4 @@ by RubyDoc.info in http://www.rubydoc.info/gems/digest-kangarootwelve/.
 5. Create a new Pull Request.
 
 [![Build Status](https://travis-ci.org/konsolebox/digest-kangarootwelve-ruby.svg?branch=master)](https://travis-ci.org/konsolebox/digest-kangarootwelve-ruby)
+[![Build status](https://ci.appveyor.com/api/projects/status/bwedifhi4wa5wik7?svg=true)](https://ci.appveyor.com/project/konsolebox/digest-kangarootwelve-ruby)
