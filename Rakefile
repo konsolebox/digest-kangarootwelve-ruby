@@ -12,4 +12,7 @@ Rake::TestTask.new(:test => :compile) do |t|
   t.verbose = true
 end
 
+# Set 'test' as default task.
+task :default => :test
+
 # Run `rake --tasks` or `rake --tasks --all` for a list of tasks.
