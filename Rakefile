@@ -7,12 +7,12 @@ Rake::ExtensionTask.new('digest/kangarootwelve', Bundler::GemHelper.gemspec)
 
 # test
 require 'rake/testtask'
-Rake::TestTask.new(:test => :compile) do |t|
+Rake::TestTask.new(:test) do |t|
   t.test_files = FileList['test/test.rb']
   t.verbose = true
 end
 
 # Set 'test' as default task.
-task :default => :test
+task :default => [:compile, :test]
 
 # Run `rake --tasks` or `rake --tasks --all` for a list of tasks.
