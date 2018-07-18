@@ -6,7 +6,7 @@ TARGETS = ['ARMv6M', 'ARMv7A', 'ARMv7M', 'ARMv8A', 'asmX86-64', 'asmX86-64shld',
     'SandyBridge', 'SkylakeX']
 
 target = with_config('target') || 'compact'
-raise "Invalid target '#{target}'." unless TARGETS.any? target
+raise "Invalid target '#{target}'." unless TARGETS.include? target
 common_dir = File.absolute_path(File.join(__FILE__, '..', 'keccak', 'common'))
 target_dir = File.absolute_path(File.join(__FILE__, '..', 'keccak', target))
 find_header('align.h', common_dir)
