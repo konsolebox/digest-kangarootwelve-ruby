@@ -9,10 +9,18 @@ strings.
 See http://kangarootwelve.org/ to know more about the hashing algorithm.
 
 The core implementation was extracted/generated from the KCP
-(https://github.com/gvanas/KeccakCodePackage).  The extension currently utilizes
-the compact version, but I'll try to use a more optimized version in the future,
-and also consider adding a capability to use an external library that can be
-natively optimized (e.g. libkeccak.a), without compromisations.
+(https://github.com/gvanas/KeccakCodePackage).
+
+KCP provides implementations on many target platforms.  This gem used to only
+have the `compact` implementation, but it now has adopted all of them.
+
+The available implementation targets are `ARMv6M`, `ARMv7A`, `ARMv7M`, `ARMv8A`,
+`asmX86-64`, `asmX86-64shld`, `AVR8`, `Bulldozer`, `compact`, `generic32`,
+`generic32lc`, `generic64`, `generic64lc`, `Haswell`, `Nehalem`, `reference`,
+`reference32bits`, `SandyBridge`, and `SkylakeX`, with `compact`  being the
+default.
+
+Instructions on how to select a target is written below.
 
 ## Installation
 
@@ -27,6 +35,17 @@ And then execute:
 It can also be installed manually with:
 
     $ gem install digest-kangarootwelve
+
+To install with a different platform target, use `--with-target`.  Example:
+
+    $ gem install digest-kangarootwelve -- --with-target=SandyBridge
+
+It's a good idea to test the gem when using a different target platform other
+than default as some platforms are not yet tested, and behavior of optimized
+code can vary on different machines or compilers.  This can be done by running
+the following command.  Replace VERSION with the installed gem's version.
+
+    $ ( cd "$(ruby -e 'puts Gem.dir')"/gems/digest-kangarootwelve-VERSION && bundle && rake test )
 
 The library can also be installed in Gentoo system-wide using 'layman':
 
