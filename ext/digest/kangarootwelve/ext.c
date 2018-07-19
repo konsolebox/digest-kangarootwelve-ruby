@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 konsolebox
+ * Copyright (c) 2017-2018 konsolebox
  *
  * MIT License
  *
