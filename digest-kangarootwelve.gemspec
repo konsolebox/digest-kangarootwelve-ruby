@@ -322,6 +322,7 @@ Gem::Specification.new do |spec|
     ext/digest/kangarootwelve/keccak/skylakex/SIMD512-config.h
     ext/digest/kangarootwelve/keccak/skylakex/ext.link.c
     ext/digest/kangarootwelve/ext.c
+    lib/digest/kangarootwelve/version.rb
     test/test.rb
   }
 
