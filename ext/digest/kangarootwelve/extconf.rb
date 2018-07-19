@@ -1,9 +1,9 @@
 require 'mkmf'
 
-TARGETS = ['ARMv6M', 'ARMv7A', 'ARMv7M', 'ARMv8A', 'asmX86-64', 'asmX86-64shld',
-    'AVR8', 'Bulldozer', 'compact', 'generic32', 'generic32lc', 'generic64',
-    'generic64lc', 'Haswell', 'Nehalem', 'reference', 'reference32bits',
-    'SandyBridge', 'SkylakeX']
+TARGETS = ['armv6m', 'armv7a', 'armv7m', 'armv8a', 'asmx86-64', 'asmx86-64shld',
+    'avr8', 'bulldozer', 'compact', 'generic32', 'generic32lc', 'generic64',
+    'generic64lc', 'haswell', 'nehalem', 'reference', 'reference32bits',
+    'sandybridge', 'skylakex']
 
 target = with_config('target') || 'compact'
 raise "Invalid target '#{target}'." unless TARGETS.include? target

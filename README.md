@@ -14,10 +14,10 @@ The core implementation was extracted/generated from the KCP
 KCP provides implementations on many target platforms.  This gem used to only
 have the `compact` implementation, but it now has adopted all of them.
 
-The available implementation targets are `ARMv6M`, `ARMv7A`, `ARMv7M`, `ARMv8A`,
-`asmX86-64`, `asmX86-64shld`, `AVR8`, `Bulldozer`, `compact`, `generic32`,
-`generic32lc`, `generic64`, `generic64lc`, `Haswell`, `Nehalem`, `reference`,
-`reference32bits`, `SandyBridge`, and `SkylakeX`, with `compact`  being the
+The available implementation targets are `armv6m`, `armv7a`, `armv7m`, `armv8a`,
+`asmx86-64`, `asmx86-64shld`, `avr8`, `bulldozer`, `compact`, `generic32`,
+`generic32lc`, `generic64`, `generic64lc`, `haswell`, `nehalem`, `reference`,
+`reference32bits`, `sandybridge`, and `skylakex`, with `compact`  being the
 default.
 
 Instructions on how to select a target is written below.
@@ -38,7 +38,7 @@ It can also be installed manually with:
 
 To install with a different platform target, use `--with-target`.  Example:
 
-    $ gem install digest-kangarootwelve -- --with-target=SandyBridge
+    $ gem install digest-kangarootwelve -- --with-target=sandybridge
 
 It's a good idea to test the gem when using a different target platform other
 than default as some platforms are not yet tested, and behavior of optimized
