@@ -1,4 +1,4 @@
-# digest-kangarootwelve-ruby
+# digest-kangarootwelve
 
 The digest-kangarootwelve gem is an implementation of KangarooTwelve for Ruby
 that works on top of `Digest::Base`.
