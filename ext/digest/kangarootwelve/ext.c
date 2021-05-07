@@ -71,6 +71,8 @@ typedef struct {
 #define KT_CONTEXT kangarootwelve_context_t
 #define KT_CONTEXT_PTR(void_ctx_ptr) ((KT_CONTEXT *) void_ctx_ptr)
 
+#define _RSTRING_PTR_U(x) (unsigned char *)RSTRING_PTR(x)
+
 static void check_digest_length(int digest_length)
 {
 	if (!(digest_length >= KT_MIN_DIGEST_LENGTH))
@@ -79,18 +81,24 @@ static void check_digest_length(int digest_length)
 
 static VALUE hex_encode_str(VALUE str)
 {
-	int len = RSTRING_LEN(str);
-	VALUE hex = rb_str_new(0, len * 2);
-	hex_encode_str_implied(RSTRING_PTR(str), len, RSTRING_PTR(hex));
+	int len;
+	VALUE hex;
+
+	len = RSTRING_LEN(str);
+	hex = rb_str_new(0, len * 2);
+	hex_encode_str_implied(_RSTRING_PTR_U(str), len, _RSTRING_PTR_U(hex));
 	return hex;
 }
 
 static VALUE hex_decode_str(VALUE str)
 {
-	int len = RSTRING_LEN(str);
-	VALUE decoded = rb_str_new(0, calc_hex_decoded_str_length(len));
+	int len;
+	VALUE decoded;
 
-	if (! hex_decode_str_implied(RSTRING_PTR(str), len, RSTRING_PTR(decoded))) {
+	len = RSTRING_LEN(str);
+	decoded = rb_str_new(0, calc_hex_decoded_str_length(len));
+
+	if (! hex_decode_str_implied(_RSTRING_PTR_U(str), len, _RSTRING_PTR_U(decoded))) {
 		VALUE inspect = rb_inspect(str);
 		rb_raise(rb_eArgError, "Failed to decode hex string %s.", RSTRING_PTR(inspect));
 	}
@@ -100,24 +108,26 @@ static VALUE hex_decode_str(VALUE str)
 
 static int kangarootwelve_init(void *ctx)
 {
+	VALUE klass_or_instance, digest_length, digest_length_int, customization;
+
 	if (ctx == NULL)
 		rb_raise(rb_eRuntimeError, "Context pointer is NULL.");
 
-	VALUE klass_or_instance = rb_current_receiver();
+	klass_or_instance = rb_current_receiver();
 
 	if (TYPE(klass_or_instance) == T_CLASS && klass_or_instance == _Digest_KangarooTwelve_Impl)
 		rb_raise(rb_eStandardError, "Digest::KangarooTwelve::Impl is a base class and cannot be instantiated.");
 
-	VALUE digest_length = rb_funcall(klass_or_instance, _id_digest_length, 0);
+	digest_length = rb_funcall(klass_or_instance, _id_digest_length, 0);
 
 	if (TYPE(digest_length) != T_FIXNUM)
 		rb_raise(rb_eTypeError, "Invalid object type for digest length.");
 
-	int digest_length_int = FIX2INT(digest_length);
+	digest_length_int = FIX2INT(digest_length);
 
 	check_digest_length(digest_length_int);
 
-	VALUE customization = rb_funcall(klass_or_instance, _id_customization, 0);
+	customization = rb_funcall(klass_or_instance, _id_customization, 0);
 
 	if (TYPE(customization) != T_NIL && TYPE(customization) != T_STRING)
 		rb_raise(rb_eTypeError, "Invalid object type for a customization string.");
@@ -144,17 +154,19 @@ static void kangarootwelve_update(void *ctx, unsigned char *data, size_t length)
 
 static int kangarootwelve_finish(void *ctx, unsigned char *data)
 {
+	VALUE customization;
+
 	if (ctx == NULL)
 		rb_raise(rb_eRuntimeError, "Context pointer is NULL.");
 
-	VALUE customization = KT_CONTEXT_PTR(ctx)->customization;
+	customization = KT_CONTEXT_PTR(ctx)->customization;
 
 	switch (TYPE(customization)) {
 	case T_NIL:
 		return KangarooTwelve_Final(&KT_CONTEXT_PTR(ctx)->instance, data, 0, 0) == 0;
 	case T_STRING:
-		return KangarooTwelve_Final(&KT_CONTEXT_PTR(ctx)->instance, data, RSTRING_PTR(customization),
-				RSTRING_LEN(customization)) == 0;
+		return KangarooTwelve_Final(&KT_CONTEXT_PTR(ctx)->instance, data,
+				_RSTRING_PTR_U(customization), RSTRING_LEN(customization)) == 0;
 	default:
 		rb_raise(rb_eRuntimeError, "Object type of customization string became invalid.");
 	}
@@ -162,10 +174,13 @@ static int kangarootwelve_finish(void *ctx, unsigned char *data)
 
 static VALUE implement(VALUE name, VALUE digest_length, VALUE customization)
 {
+	VALUE impl_class, impl_class_name, prev_digest_length, metadata_obj;
+	ID impl_class_name_id, id;
+	int digest_length_int, prev_digest_length_int;
+	rb_digest_metadata_t *metadata;
+
 	if (!KT_DIGEST_API_VERSION_IS_SUPPORTED(RUBY_DIGEST_API_VERSION))
 		rb_raise(rb_eRuntimeError, "Digest API version is not supported.");
-
-	int digest_length_int;
 
 	switch (TYPE(digest_length)) {
 	case T_NIL:
@@ -187,8 +202,7 @@ static VALUE implement(VALUE name, VALUE digest_length, VALUE customization)
 		rb_raise(rb_eTypeError, "Invalid value type for customization string.");
 	}
 
-	VALUE impl_class_name = Qnil;
-	ID impl_class_name_id, id;
+	impl_class_name = Qnil;
 
 	switch (TYPE(name)) {
 	case T_NIL:
@@ -223,8 +237,6 @@ static VALUE implement(VALUE name, VALUE digest_length, VALUE customization)
 		rb_raise(rb_eTypeError, "Invalid argument type for class name.");
 	}
 
-	VALUE impl_class;
-
 	if (impl_class_name == Qnil) {
 		impl_class = rb_funcall(rb_cClass, _id_new, 1, _Digest_KangarooTwelve_Impl);
 	} else {
@@ -243,7 +255,7 @@ static VALUE implement(VALUE name, VALUE digest_length, VALUE customization)
 						StringValueCStr(impl_class_name));
 			}
 
-			VALUE prev_digest_length = rb_ivar_get(impl_class, _id_digest_length);
+			prev_digest_length = rb_ivar_get(impl_class, _id_digest_length);
 
 			if (TYPE(prev_digest_length) != T_FIXNUM) {
 				rb_raise(rb_eRuntimeError,
@@ -251,7 +263,7 @@ static VALUE implement(VALUE name, VALUE digest_length, VALUE customization)
 						StringValueCStr(impl_class_name));
 			}
 
-			int prev_digest_length_int = FIX2INT(prev_digest_length);
+			prev_digest_length_int = FIX2INT(prev_digest_length);
 
 			if (prev_digest_length_int != digest_length_int) {
 				rb_raise(rb_eTypeError,
@@ -267,8 +279,6 @@ static VALUE implement(VALUE name, VALUE digest_length, VALUE customization)
 		impl_class = rb_define_class_id_under(_Digest, impl_class_name_id, _Digest_KangarooTwelve_Impl);
 	}
 
-	VALUE metadata_obj;
-	rb_digest_metadata_t *metadata;
 	metadata_obj = Data_Make_Struct(_Digest_KangarooTwelve_Metadata, rb_digest_metadata_t, 0, -1, metadata);
 
 	metadata->api_version = RUBY_DIGEST_API_VERSION;
@@ -560,17 +570,22 @@ static VALUE _Digest_KangarooTwelve_Impl_customization_hex(VALUE self)
  */
 static VALUE _Digest_KangarooTwelve_Impl_inspect(VALUE self)
 {
-	VALUE klass = rb_obj_class(self);
-	VALUE klass_name = rb_class_name(klass);
+	VALUE klass, klass_name, digest_length, customization_hex, hexdigest, args[4];
+
+	klass = rb_obj_class(self);
+	klass_name = rb_class_name(klass);
 
 	if (klass_name == Qnil)
 		klass_name = rb_inspect(klass);
 
-	VALUE digest_length = rb_funcall(self, _id_digest_length, 0);
-	VALUE customization_hex = rb_funcall(self, _id_customization_hex, 0);
-	VALUE hexdigest = rb_funcall(self, _id_hexdigest, 0);
+	digest_length = rb_funcall(self, _id_digest_length, 0);
+	customization_hex = rb_funcall(self, _id_customization_hex, 0);
+	hexdigest = rb_funcall(self, _id_hexdigest, 0);
 
-	VALUE args[] = { klass_name, digest_length, customization_hex, hexdigest };
+	args[0] = klass_name;
+	args[1] = digest_length;
+	args[2] = customization_hex;
+	args[3] = hexdigest;
 	return rb_str_format(sizeof(args), args, rb_str_new_literal("#<%s:%d|%s|%s>"));
 }
 

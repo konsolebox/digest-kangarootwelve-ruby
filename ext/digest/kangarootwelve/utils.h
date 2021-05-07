@@ -34,8 +34,10 @@ static void hex_encode_str_implied(const unsigned char *src, size_t len, unsigne
  */
 static int hex_decode_str_implied(const unsigned char *src, size_t len, unsigned char *dest)
 {
+	unsigned char low, high;
+
 	if (len % 2) {
-		unsigned char low = *src++;
+		low = *src++;
 
 		if (low >= '0' && low <= '9') {
 			low -= '0';
@@ -52,7 +54,7 @@ static int hex_decode_str_implied(const unsigned char *src, size_t len, unsigned
 	}
 
 	for (; len > 0; len -= 2) {
-		unsigned char high = *src++;
+		high = *src++;
 
 		if (high >= '0' && high <= '9') {
 			high -= '0';
@@ -64,7 +66,7 @@ static int hex_decode_str_implied(const unsigned char *src, size_t len, unsigned
 			return 0;
 		}
 
-		unsigned char low = *src++;
+		low = *src++;
 
 		if (low >= '0' && low <= '9') {
 			low -= '0';
