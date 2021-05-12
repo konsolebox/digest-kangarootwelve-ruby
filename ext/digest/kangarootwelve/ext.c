@@ -76,7 +76,8 @@ typedef struct {
 static void check_digest_length(int digest_length)
 {
 	if (!(digest_length >= KT_MIN_DIGEST_LENGTH))
-		rb_raise(rb_eArgError, "Digest length lesser than minimum (%d): %d", KT_MIN_DIGEST_LENGTH, digest_length);
+		rb_raise(rb_eArgError, "Digest length lesser than minimum (%d): %d", KT_MIN_DIGEST_LENGTH,
+				digest_length);
 }
 
 static VALUE hex_encode_str(VALUE str)
@@ -116,7 +117,8 @@ static int kangarootwelve_init(void *ctx)
 	klass_or_instance = rb_current_receiver();
 
 	if (TYPE(klass_or_instance) == T_CLASS && klass_or_instance == _Digest_KangarooTwelve_Impl)
-		rb_raise(rb_eStandardError, "Digest::KangarooTwelve::Impl is a base class and cannot be instantiated.");
+		rb_raise(rb_eStandardError, "Digest::KangarooTwelve::Impl is a base class and cannot be "
+				"instantiated.");
 
 	digest_length = rb_funcall(klass_or_instance, _id_digest_length, 0);
 
@@ -220,7 +222,8 @@ static VALUE implement(VALUE name, VALUE digest_length, VALUE customization)
 			impl_class_name_id = rb_intern_str(impl_class_name);
 		} else {
 			VALUE symbol_inspect = rb_inspect(name);
-			rb_raise(rb_eArgError, "Invalid symbol argument for class name: %s", StringValueCStr(symbol_inspect));
+			rb_raise(rb_eArgError, "Invalid symbol argument for class name: %s",
+					StringValueCStr(symbol_inspect));
 		}
 
 		break;
@@ -250,36 +253,34 @@ static VALUE implement(VALUE name, VALUE digest_length, VALUE customization)
 			}
 
 			if (rb_class_superclass(impl_class) != _Digest_KangarooTwelve_Impl) {
-				rb_raise(rb_eTypeError,
-						"Digest::%s was already defined but not derived from Digest::KangarooTwelve::Impl.",
-						StringValueCStr(impl_class_name));
+				rb_raise(rb_eTypeError, "Digest::%s was already defined but not derived from "
+						"Digest::KangarooTwelve::Impl.", StringValueCStr(impl_class_name));
 			}
 
 			prev_digest_length = rb_ivar_get(impl_class, _id_digest_length);
 
 			if (TYPE(prev_digest_length) != T_FIXNUM) {
-				rb_raise(rb_eRuntimeError,
-						"Previous definition of Digest::%s has invalid digest length value type.",
-						StringValueCStr(impl_class_name));
+				rb_raise(rb_eRuntimeError, "Previous definition of Digest::%s has invalid digest "
+						"length value type.", StringValueCStr(impl_class_name));
 			}
 
 			prev_digest_length_int = FIX2INT(prev_digest_length);
 
 			if (prev_digest_length_int != digest_length_int) {
-				rb_raise(rb_eTypeError,
-						"Digest::%s was already defined but has different digest length (%d instead of %d).",
-						StringValueCStr(impl_class_name),
-						prev_digest_length_int,
-						digest_length_int);
+				rb_raise(rb_eTypeError, "Digest::%s was already defined but has different digest "
+						"length (%d instead of %d).", StringValueCStr(impl_class_name),
+						prev_digest_length_int, digest_length_int);
 			}
 
 			return impl_class;
 		}
 
-		impl_class = rb_define_class_id_under(_Digest, impl_class_name_id, _Digest_KangarooTwelve_Impl);
+		impl_class = rb_define_class_id_under(_Digest, impl_class_name_id,
+				_Digest_KangarooTwelve_Impl);
 	}
 
-	metadata_obj = Data_Make_Struct(_Digest_KangarooTwelve_Metadata, rb_digest_metadata_t, 0, -1, metadata);
+	metadata_obj = Data_Make_Struct(_Digest_KangarooTwelve_Metadata, rb_digest_metadata_t, 0, -1,
+			metadata);
 
 	metadata->api_version = RUBY_DIGEST_API_VERSION;
 	metadata->digest_len = digest_length_int;
@@ -466,8 +467,10 @@ static VALUE _Digest_KangarooTwelve_Impl_singleton_new(VALUE self)
 	if (self == _Digest_KangarooTwelve_Impl)
 		rb_raise(rb_eRuntimeError, "Digest::KangarooTwelve::Impl is an abstract class.");
 
-	if (rb_ivar_defined(self, _id_metadata) == Qfalse || rb_obj_class(rb_ivar_get(self, _id_metadata)) != _Digest_KangarooTwelve_Metadata)
-		rb_raise(rb_eRuntimeError, "Metadata not set or invalid.  Please do not manually inherit KangarooTwelve.");
+	if (rb_ivar_defined(self, _id_metadata) == Qfalse ||
+			rb_obj_class(rb_ivar_get(self, _id_metadata)) != _Digest_KangarooTwelve_Metadata)
+		rb_raise(rb_eRuntimeError, "Metadata not set or invalid.  Please do not manually inherit "
+				"KangarooTwelve.");
 
 	return rb_call_super(0, 0);
 }
@@ -505,7 +508,8 @@ static VALUE _Digest_KangarooTwelve_Impl_singleton_customization(VALUE self)
 	if (self == _Digest_KangarooTwelve_Impl)
 		rb_raise(rb_eRuntimeError, "Digest::KangarooTwelve::Impl is an abstract class.");
 
-	return rb_ivar_defined(self, _id_customization) == Qtrue ? rb_ivar_get(self, _id_customization) : Qnil;
+	return rb_ivar_defined(self, _id_customization) == Qtrue ? rb_ivar_get(self, _id_customization)
+			: Qnil;
 }
 
 /*
@@ -618,7 +622,8 @@ void Init_kangarootwelve()
 	_Digest = rb_path2class("Digest");
 
 	#if 0
-	_Digest = rb_define_module("Digest"); /* Tell RDoc about Digest since it doesn't recognize rb_path2class. */
+	/* Tell RDoc about Digest since it doesn't recognize rb_path2class. */
+	_Digest = rb_define_module("Digest");
 	#endif
 
 	/*
@@ -652,7 +657,8 @@ void Init_kangarootwelve()
 
 	/* 64 bytes (512 bits) */
 
-	rb_define_const(_Digest_KangarooTwelve, "DEFAULT_DIGEST_LENGTH", INT2FIX(KT_DEFAULT_DIGEST_LENGTH));
+	rb_define_const(_Digest_KangarooTwelve, "DEFAULT_DIGEST_LENGTH",
+			INT2FIX(KT_DEFAULT_DIGEST_LENGTH));
 
 	/*
 	 * Document-class: Digest::KangarooTwelve::Impl
