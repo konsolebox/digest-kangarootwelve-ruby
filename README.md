@@ -113,6 +113,5 @@ https://rubygems.org/gems/digest-kangarootwelve
 4. Push to the branch (`git push origin my-new-feature`).
 5. Create a new Pull Request.
 
-[![Build Status](https://travis-ci.org/konsolebox/digest-kangarootwelve-ruby.svg?branch=master)](https://travis-ci.org/konsolebox/digest-kangarootwelve-ruby)
-[![Build Status](https://ci.appveyor.com/api/projects/status/bwedifhi4wa5wik7?svg=true)](https://ci.appveyor.com/project/konsolebox/digest-kangarootwelve-ruby)
 [![Build Status](https://github.com/konsolebox/digest-kangarootwelve-ruby/actions/workflows/ruby.yml/badge.svg)](https://github.com/konsolebox/digest-kangarootwelve-ruby/actions/workflows/ruby.yml)
+[![Build Status](https://ci.appveyor.com/api/projects/status/bwedifhi4wa5wik7?svg=true)](https://ci.appveyor.com/project/konsolebox/digest-kangarootwelve-ruby)
