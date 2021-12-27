@@ -36,9 +36,16 @@ end
 Rake::Task[:build].prerequisites.unshift :import_xkcp_files_lazy
 Rake::Task[:compile].prerequisites.unshift :import_xkcp_files_lazy
 
+# compile_lazy
+task :compile_lazy do
+  compile_task = Rake::Task[:compile]
+  compile_task.invoke unless compile_task.already_invoked || \
+      File.exist?(File.expand_path("../lib/digest/xxhash.so", __FILE__))
+end
+
 # test
 require 'rake/testtask'
-Rake::TestTask.new(:test) do |t|
+Rake::TestTask.new(:test => :compile_lazy) do |t|
   t.test_files = FileList['test/test.rb']
   t.verbose = true
 end
