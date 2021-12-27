@@ -136,4 +136,8 @@ describe Digest::KangarooTwelve do
       _(Digest::KangarooTwelve.implement(digest_length: 32, customization: c).new.hexdigest(m)).must_equal hash
     end
   end
+
+  it "must have VERSION constant" do
+    _(Digest::KangarooTwelve.constants).must_include :VERSION
+  end
 end
