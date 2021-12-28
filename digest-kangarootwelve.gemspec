@@ -24,6 +24,7 @@ Gem::Specification.new do |spec|
     Rakefile
     digest-kangarootwelve.gemspec
     lib/digest/kangarootwelve/version.rb
+    rakelib/alt-install-task.rake
     test/test.rb
   } + Find.find('ext').to_a
 

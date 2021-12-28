@@ -1,4 +1,4 @@
-# build, clean, clobber, install, install:local, release[remote]
+# build, clean, clobber, release[remote]
 require 'bundler/gem_tasks'
 
 # clean, clobber, compile, compile:digest/kangarootwelve
