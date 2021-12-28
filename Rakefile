@@ -12,6 +12,23 @@ task :initialize_xkcp do |t|
   system "git submodule init && git submodule update -f"
 end
 
+# import_xkcp_license
+task :import_xkcp_license do
+  Rake::Task[:initialize_xkcp].invoke unless File.exist?("XKCP/README.markdown")
+  puts "Extracting XKCP license from \"XKCP/README.markdown\" and saving it to \"LICENSE.XKCP\"."
+  license = File.binread('XKCP/README.markdown')
+    .scan(/# Under which license is the XKCP.*?(?=^#)/m)
+    .first.rstrip
+  File.open('LICENSE.XKCP', 'w'){ |io| io.puts license }
+end.instance_eval do
+  def needed?
+    !File.exist?("LICENSE.XKCP") || !File.exist?("XKCP/README.markdown") ||
+        File.mtime("XKCP/README.markdown") > File.mtime("LICENSE.XKCP")
+  end
+end
+
+Rake::Task[:build].prerequisites.unshift :import_xkcp_license
+
 # import_xkcp_files
 desc "Import needed XKCP files and prepare target directories"
 task :import_xkcp_files => [:initialize_xkcp, :clean] do |t|

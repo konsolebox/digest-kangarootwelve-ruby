@@ -26,7 +26,9 @@ Gem::Specification.new do |spec|
     lib/digest/kangarootwelve/version.rb
     rakelib/alt-install-task.rake
     test/test.rb
-  } + Find.find('ext').to_a
+  }
+  spec.files += Find.find('ext').to_a
+  spec.files += ['LICENSE.XKCP'] if File.exist? 'LICENSE.XKCP'
 
   spec.executables   = []
   spec.test_files    = ['test/test.rb']
