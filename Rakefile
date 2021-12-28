@@ -28,6 +28,7 @@ end.instance_eval do
 end
 
 Rake::Task[:build].prerequisites.unshift :import_xkcp_license
+CLOBBER.include "LICENSE.XKCP" if File.exist? ".git"
 
 # import_xkcp_files
 desc "Import needed XKCP files and prepare target directories"
@@ -37,8 +38,10 @@ task :import_xkcp_files => [:initialize_xkcp, :clean] do |t|
   end
 end
 
-CLOBBER.include "ext/digest/kangarootwelve/XKCP"
-CLOBBER.include "ext/digest/kangarootwelve/targets"
+if File.exist? ".git"
+  CLOBBER.include "ext/digest/kangarootwelve/XKCP"
+  CLOBBER.include "ext/digest/kangarootwelve/targets"
+end
 
 # import_xkcp_files_lazy
 task :import_xkcp_files_lazy do
