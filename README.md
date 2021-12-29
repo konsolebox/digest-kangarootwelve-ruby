@@ -1,62 +1,93 @@
 # digest-kangarootwelve
 
-The digest-kangarootwelve gem is an implementation of KangarooTwelve for Ruby
-that works on top of `Digest::Base`.
+This gem is an implementation of KangarooTwelve for Ruby that works on top of
+the `Digest::Base` class.
 
-It allows hashing with different digest lengths and different customization
-strings.
+It can be configured to produce outputs with different digest lengths, and can
+be initilized with different customization strings.
 
-See http://kangarootwelve.org/ to know more about the hashing algorithm.
+To know more about the KangarooTwelve algorithm, visit
+https://keccak.team/kangarootwelve.html.
 
-The core implementation was extracted/generated from the KCP
-(https://github.com/gvanas/KeccakCodePackage).
+The core implementation of KangarooTwelve is part of the
+[XKCP](https://github.com/XKCP/XKCP) project.
 
-KCP provides implementations on many target platforms.  This gem used to only
-have the `compact` implementation, but it now has adopted all of them.
+XKCP provides multiple targets for different architecture-dependent builds.
 
-The available implementation targets are `armv6m`, `armv7a`, `armv7m`, `armv8a`,
-`asmx86-64`, `asmx86-64shld`, `avr8`, `bulldozer`, `compact`, `generic32`,
-`generic32lc`, `generic64`, `generic64lc`, `haswell`, `nehalem`, `reference`,
-`reference32bits`, `sandybridge`, and `skylakex`, with `compact`  being the
-default.
+This gem can be configured to compile differently based on the target specified.
 
-Instructions on how to select a target is written below.
+The current target implementations are `armv6`, `armv6m`, `armv7a`, `armv7m`,
+`armv8a`, `avr8`, `avx`, `avx2`, `avx2noasm`, `avx512`, `avx512noasm`,
+`compact`, `generic32`, `generic32lc`, `generic64`, `generic64lc`, `reference`,
+`reference32bits`, `ssse3`, and `xop`, with `compact` being the default target.
+
+Details on what architectures these targets support are provided in the
+[README.markdown](https://github.com/XKCP/XKCP/blob/master/README.markdown) file
+of XKCP.
 
 ## Installation
 
-Add this line to the application's Gemfile:
+To use the gem in an application, add the following line to the application's
+Gemfile:
 
     gem 'digest-kangarootwelve'
 
 And then execute:
 
-    $ bundle
+    bundle
 
-It can also be installed manually with:
+The gem can also be installed manually using the `gem` command:
 
-    $ gem install digest-kangarootwelve
+    gem install digest-kangarootwelve
 
-To install with a different platform target, use `--with-target`.  Example:
+To build and install the gem against a different platform target, use a
+`--with-target` option that follows a `--`.  Example:
 
-    $ gem install digest-kangarootwelve -- --with-target=sandybridge
+    gem install digest-kangarootwelve -- --with-target=avx
 
-It's a good idea to test the gem when using a different target platform other
-than default as some platforms are not yet tested, and behavior of optimized
-code can vary on different machines or compilers.  This can be done by running
-the following command.  Replace VERSION with the installed gem's version.
+It's also a good idea to test the gem before actively using it, especially when
+using a not so commonly used target.  Here's one way to test it:
 
-    $ ( cd "$(ruby -e 'puts Gem.dir')"/gems/digest-kangarootwelve-VERSION && bundle && rake test )
+    cd GEM_DIR/gems/digest-kangarootwelve-VERSION
+    bundle
+    rake test
 
-The library can also be installed in Gentoo system-wide using 'layman':
+To know the right value of GEM_DIR, try running `gem info digest-kangarootwelve`.
 
-    # Fetch remote list of overlays, and add 'konsolebox' overlay
+## Installing in Gentoo
+
+The library can also be globally installed in Gentoo using `layman`:
+
+    # Fetch remote list of overlays, and add 'konsolebox' overlay.
     layman -f && layman -a konsolebox
 
-    # Unmask unstable keyword
-    echo 'dev-ruby/digest-kangarootwelve' > /etc/portage/package.keywords/dev-ruby.digest-kangarootwelve
+    # Unmask unstable keyword.
+    echo 'dev-ruby/digest-kangarootwelve' > /etc/portage/package.accept_keywords/dev-ruby.digest-kangarootwelve
 
-    # Merge package
+    # Merge package.
     emerge dev-ruby/digest-kangarootwelve
+
+## Testing from source
+
+The gem can also be tested from source using the following commands:
+
+    # Clone this repo.
+    git clone https://github.com/konsolebox/digest-kangarootwelve-ruby.git -b master
+
+    # Change to directory.
+    cd digest-kangarootwelve-ruby
+
+    # Optionally checkout a tagged version.
+    git checkout v0.4.0
+
+    # Run bundle
+    bundle
+
+    # Finally run `rake` to compile the extension and test the gem.
+    rake
+
+    # A different target can also be specified.  Example:
+    rake clean clobber && rake -- --with-target=avx
 
 ## Example Usage
 
