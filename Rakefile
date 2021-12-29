@@ -1,55 +1,43 @@
 # build, clean, clobber, release[remote]
 require 'bundler/gem_tasks'
 
-# clean, clobber, compile, compile:digest/kangarootwelve
+# compile, compile:digest/kangarootwelve
 require 'rake/extensiontask'
 Rake::ExtensionTask.new('digest/kangarootwelve', Bundler::GemHelper.gemspec)
 
 # initialize_xkcp
 desc "Initialize and update XKCP submodule"
-task :initialize_xkcp do |t|
+task :initialize_xkcp => ".git" do |t|
   puts "Initializing and updating XKCP submodule"
   system "git submodule init && git submodule update -f"
 end
 
+file "XKCP/Makefile.build" => :initialize_xkcp
+file "XKCP/README.markdown" => :initialize_xkcp
+
 # import_xkcp_license
 task :import_xkcp_license do
-  Rake::Task[:initialize_xkcp].invoke unless File.exist?("XKCP/README.markdown")
+  Rake::Task["XKCP/README.markdown"].invoke
   puts "Extracting XKCP license from \"XKCP/README.markdown\" and saving it to \"LICENSE.XKCP\"."
-  license = File.binread('XKCP/README.markdown')
-    .scan(/# Under which license is the XKCP.*?(?=^#)/m)
-    .first.rstrip
-  File.open('LICENSE.XKCP', 'w'){ |io| io.puts license }
+  license = File.binread("XKCP/README.markdown")
+                .scan(/# Under which license is the XKCP.*?(?=^#)/m).first
+  raise "No license extracted" unless license
+  File.binwrite("LICENSE.XKCP", license.strip + "\n")
 end.instance_eval do
   def needed?
-    !File.exist?("LICENSE.XKCP") || !File.exist?("XKCP/README.markdown") ||
-        File.mtime("XKCP/README.markdown") > File.mtime("LICENSE.XKCP")
+    !File.exist?("LICENSE.XKCP") || File.exist?("XKCP/README.markdown") &&
+        File.mtime("LICENSE.XKCP") < File.mtime("XKCP/README.markdown")
   end
 end
 
 Rake::Task[:build].prerequisites.unshift :import_xkcp_license
-CLOBBER.include "LICENSE.XKCP" if File.exist? ".git"
-
-# import_xkcp_files
-desc "Import needed XKCP files and prepare target directories"
-task :import_xkcp_files => [:initialize_xkcp, :clean] do |t|
-  Dir.chdir File.dirname(__FILE__) do
-    Rake.ruby "./import-xkcp-files.rb"
-  end
-end
-
-if File.exist? ".git"
-  CLOBBER.include "ext/digest/kangarootwelve/XKCP"
-  CLOBBER.include "ext/digest/kangarootwelve/targets"
-end
 
 # import_xkcp_files_lazy
 task :import_xkcp_files_lazy do
-  Dir.chdir File.dirname(__FILE__) do
-    if !File.exist?("./ext/digest/kangarootwelve/XKCP") || \
-        !File.exist?("./ext/digest/kangarootwelve/targets")
-      Rake::Task[:import_xkcp_files].invoke
-    end
+  Rake::Task[:import_xkcp_files].invoke
+end.instance_eval do
+  def needed?
+    %w[XKCP targets].any?{ |dir| !File.exist?("ext/digest/kangarootwelve/#{dir}") }
   end
 end
 
@@ -58,9 +46,11 @@ Rake::Task[:compile].prerequisites.unshift :import_xkcp_files_lazy
 
 # compile_lazy
 task :compile_lazy do
-  compile_task = Rake::Task[:compile]
-  compile_task.invoke unless compile_task.already_invoked || \
-      File.exist?(File.expand_path("../lib/digest/xxhash.so", __FILE__))
+  Rake::Task[:compile].invoke
+end.instance_eval do
+  def needed?
+    !File.exist?("lib/digest/kangarootwelve.so")
+  end
 end
 
 # test
@@ -72,5 +62,11 @@ end
 
 # default
 task :default => [:compile, :test]
+
+if File.exist?(".git")
+  CLOBBER.include "LICENSE.XKCP"
+  CLOBBER.include "ext/digest/kangarootwelve/XKCP"
+  CLOBBER.include "ext/digest/kangarootwelve/targets"
+end
 
 # Run `rake --tasks` or `rake --tasks --all` for a list of tasks.
