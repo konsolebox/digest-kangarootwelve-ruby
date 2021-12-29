@@ -1,7 +1,5 @@
 require 'minitest/autorun'
-
-TEST_DIR = File.dirname(__FILE__)
-require File.join(TEST_DIR, %w{ .. lib digest kangarootwelve })
+require File.expand_path('../../lib/digest/kangarootwelve', __FILE__)
 
 def get_repeated_0x00_to_0xfa(length)
   hex = (0..0xfa).to_a.map{ |e| sprintf "%2x", e }.join
