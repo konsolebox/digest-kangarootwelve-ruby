@@ -116,7 +116,7 @@ private
         IMPL_FILES.map{ |file| REL_PATH_FROM_TARGETS_TO_EXT_DIR + "/" + file }
       ].flatten.each do |relative_path|
         basename = relative_path[/[^\/]+$/]
-        delegate_file = File.join(target_dir, basename)
+        delegate_file = File.join(target_dir, basename).gsub(/\.s$/, ".S")
         raise "Delegate file conflict: #{delegate_file}" if delegate_file_reg.has_key? delegate_file
         delegate_file_reg[delegate_file] = true
         puts "Creating #{delegate_file}."
