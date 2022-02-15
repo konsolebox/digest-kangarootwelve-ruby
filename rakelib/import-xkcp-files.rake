@@ -47,7 +47,7 @@ private
 
   def get_fragment_files(fragments)
     fragments.inject({}) do |hash, fragment|
-      ['c', 'h', 'inc']
+      ['c', 'h', 'inc', 's', 'S']
         .map{ |e| fragment[e] }
         .reject(&:nil?)
         .map{ |e| e.split(' ') unless e.is_a? Array; e }
