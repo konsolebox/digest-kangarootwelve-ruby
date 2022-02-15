@@ -45,6 +45,9 @@ To build and install the gem against a different platform target, use a
 
     gem install digest-kangarootwelve -- --with-target=avx
 
+Targets may also need `CFLAGS` specified.  Please see the
+[Build failures](#build-failures) section.
+
 It's also a good idea to test the gem before actively using it, especially when
 using a not so commonly used target.  Here's one way to test it:
 
@@ -88,6 +91,25 @@ The gem can also be tested from source using the following commands:
 
     # A different target can also be specified.  Example:
     rake clean clobber && rake -- --with-target=avx
+
+## Build failures
+
+Targets like AVX2 may fail to build unless an explicit `CFLAGS` with proper
+architecture-related options is specified.
+
+Specifying a `CFLAGS` can be done by using the `--with-cflags` option.  For example:
+
+    rake -- --with-target=avx2 --with-cflags="-march=native"
+
+    gem install digest-kangarootwelve -- --with-target=avx2 --with-cflags="-march=native"
+
+    bundle config build.digest-kangarootwelve --with-target=avx2 --with-cflags="-march=native"
+
+Compact (the default target) and AVX targets have been tested to not need a
+`CFLAGS` to compile and work.
+
+Please note that this gem has not been tested to work with cross-compilations,
+so please test the resulting runtime thoroughly.
 
 ## Example Usage
 
