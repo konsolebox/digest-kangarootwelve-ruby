@@ -106,7 +106,6 @@ private
     targets.each do |target_name|
       needed_fragments = get_needed_fragments([target_name] + PERSISTENT_TARGETS, mapped_fragments, {})
       needed_files = get_fragment_files(needed_fragments.values)
-      expanded_impl_files = IMPL_FILES.map{ |file| File.join(EXT_DIR, file) }
       delegate_file_reg = {}
       target_dir = File.join(TARGETS_DIR, target_name.downcase)
       FileUtils.mkdir target_dir
