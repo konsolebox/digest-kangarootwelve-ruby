@@ -11,7 +11,10 @@ Gem::Specification.new do |spec|
   spec.authors       = ["konsolebox"]
   spec.email         = ["konsolebox@gmail.com"]
   spec.summary       = "KangarooTwelve for Ruby"
-  spec.description   = "A KangarooTwelve library that works on top of Digest::Base."
+  spec.description   = "A KangarooTwelve library that utilizes the XKCP package and can be " \
+                       "optionally optimized during compile-time based on a target. It produces " \
+                       "implementation classes that work on top of Digest::Base and conform " \
+                       "with how Digest classes work."
   spec.homepage      = "https://github.com/konsolebox/digest-kangarootwelve-ruby"
   spec.license       = "MIT"
 
