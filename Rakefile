@@ -30,7 +30,9 @@ end.instance_eval do
   end
 end
 
+Rake::Task[:build].prerequisites.unshift :import_xkcp_files
 Rake::Task[:build].prerequisites.unshift :import_xkcp_license
+Rake::Task[:build].prerequisites.unshift :clobber
 
 # import_xkcp_files_lazy
 task :import_xkcp_files_lazy do
@@ -41,7 +43,6 @@ end.instance_eval do
   end
 end
 
-Rake::Task[:build].prerequisites.unshift :import_xkcp_files_lazy
 Rake::Task[:compile].prerequisites.unshift :import_xkcp_files_lazy
 
 # compile_lazy
