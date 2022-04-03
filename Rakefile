@@ -69,4 +69,8 @@ if File.exist?(".git")
   CLOBBER.include "ext/digest/kangarootwelve/targets"
 end
 
+CLEAN.include "ext/digest/kangarootwelve/Makefile"
+CLEAN.include "ext/digest/kangarootwelve/**/*.o"
+CLEAN.include "ext/digest/kangarootwelve/**/*.so"
+
 # Run `rake --tasks` or `rake --tasks --all` for a list of tasks.
