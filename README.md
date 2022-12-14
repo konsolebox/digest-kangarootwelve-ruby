@@ -55,17 +55,34 @@ using a not so commonly used target.  Here's one way to test it:
     bundle
     rake test
 
-To know the right value of GEM_DIR, try running `gem info digest-kangarootwelve`.
+To know the right value of GEM_DIR, try running
+`gem info digest-kangarootwelve`.
 
 ## Installing in Gentoo
 
-The library can also be globally installed in Gentoo using `layman`:
+The library can also be globally installed in Gentoo using `layman` or
+`eselect-repository`:
 
     # Fetch remote list of overlays, and add 'konsolebox' overlay.
     layman -f && layman -a konsolebox
 
+    # Or enable repo through eselect-repository.
+    eselect repository enable konsolebox
+    emaint sync --repo konsolebox
+
     # Unmask unstable keyword.
     echo 'dev-ruby/digest-kangarootwelve' > /etc/portage/package.accept_keywords/dev-ruby.digest-kangarootwelve
+
+    # Optionally specify a different build target that works better in the
+    # machine.  This may need additional CFLAGS options like -march=native set
+    # in the environment.  The default build target `compact` should also be
+    # disabled.
+    echo 'dev-ruby/digest-kangarootwelve target_avx512 -target_compact' > /etc/portage/package.use/dev-ruby.digest-kangarootwelve
+
+    # To enable testing, FEATURES=test should be set in the environment, and
+    # test use flag should also be enabled.
+    printf '%s\n' 'FEATURES="${FEATURES-} test"' 'USE="${USE-} test"' > /etc/portage/env/test
+    echo 'dev-ruby/digest-kangarootwelve test' > /etc/portage/package.env/dev-ruby.digest-kangarootwelve
 
     # Merge package.
     emerge dev-ruby/digest-kangarootwelve
@@ -81,7 +98,7 @@ The gem can also be tested from source using the following commands:
     cd digest-kangarootwelve-ruby
 
     # Optionally checkout a tagged version.
-    git checkout v0.4.0
+    git checkout v0.4.6
 
     # Run bundle
     bundle
@@ -97,7 +114,8 @@ The gem can also be tested from source using the following commands:
 Targets like AVX2 may fail to build unless an explicit `CFLAGS` with proper
 architecture-related options is specified.
 
-Specifying a `CFLAGS` can be done by using the `--with-cflags` option.  For example:
+Specifying a `CFLAGS` can be done by using the `--with-cflags` option.  For
+example:
 
     rake -- --with-target=avx2 --with-cflags="-march=native"
 
@@ -112,6 +130,8 @@ Please note that this gem has not been tested to work with cross-compilations,
 so please test the resulting runtime thoroughly.
 
 ## Example Usage
+
+    require 'digest/kangarootwelve'
 
     Digest::KangarooTwelve[32].digest("abc")
     => "\xAB\x17O2\x8CU\xA5Q\v\v \x97\x91\xBF\x8B`\xE8\x01\xA7\xCF\xC2\xAAB\x04-\xCB\x8FT\x7F\xBE:}"
