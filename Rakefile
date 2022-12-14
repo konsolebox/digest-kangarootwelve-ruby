@@ -30,16 +30,13 @@ file "XKCP/README.markdown" => :initialize_xkcp
 # import_xkcp_license
 
 task :import_xkcp_license do
-  Rake::Task["XKCP/README.markdown"].invoke
-  puts "Extracting XKCP license from \"XKCP/README.markdown\" and saving it to \"LICENSE.XKCP\"."
-  license = File.binread("XKCP/README.markdown")
-                .scan(/# Under which license is the XKCP.*?(?=^#)/m).first
-  raise "No license extracted" unless license
-  File.binwrite("LICENSE.XKCP", license.strip + "\n")
+  Rake::Task["XKCP/LICENSE"].invoke
+  puts "Importing XKCP/LICENSE as LICENSE.XKCP."
+  File.binwrite("LICENSE.XKCP", File.binread("XKCP/LICENSE"))
 end.instance_eval do
   def needed?
-    !File.exist?("LICENSE.XKCP") || File.exist?("XKCP/README.markdown") &&
-        File.mtime("LICENSE.XKCP") < File.mtime("XKCP/README.markdown")
+    !File.exist?("LICENSE.XKCP") || File.exist?("XKCP/LICENSE") &&
+        File.mtime("LICENSE.XKCP") < File.mtime("XKCP/LICENSE")
   end
 end
 
