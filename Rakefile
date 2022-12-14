@@ -20,7 +20,7 @@ end
 
 desc "Initialize and update XKCP submodule"
 task :initialize_xkcp => ".git" do |t|
-  puts "Initializing and updating XKCP submodule"
+  puts "Initializing and updating XKCP submodule."
   system "git submodule init && git submodule update -f"
 end
 
