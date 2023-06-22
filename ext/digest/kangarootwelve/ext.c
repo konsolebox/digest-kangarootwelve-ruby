@@ -597,7 +597,7 @@ static VALUE _Digest_KangarooTwelve_Impl_inspect(VALUE self)
  * Init
  */
 
-void Init_kangarootwelve()
+void Init_kangarootwelve(void)
 {
 	#define DEFINE_ID(x) _id_##x = rb_intern_const(#x);
 
