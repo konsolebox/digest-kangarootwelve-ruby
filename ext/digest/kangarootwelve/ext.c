@@ -695,5 +695,7 @@ void Init_kangarootwelve(void)
 	_Digest_KangarooTwelve_Metadata = rb_define_class_under(_Digest_KangarooTwelve, "Metadata",
 			rb_cObject);
 
+	rb_undef_alloc_func(_Digest_KangarooTwelve_Metadata);
+
 	rb_require("digest/kangarootwelve/version");
 }
