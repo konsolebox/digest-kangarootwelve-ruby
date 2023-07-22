@@ -98,7 +98,7 @@ The gem can also be tested from source using the following commands:
     cd digest-kangarootwelve-ruby
 
     # Optionally checkout a tagged version.
-    git checkout v0.4.7
+    git checkout v0.4.8
 
     # Run bundle
     bundle
