@@ -68,7 +68,7 @@ private
     end
 
     targets = build_data['group'].find{ |e| (e['@all'] rescue nil) == "XKCP" }['product']['factor']
-      .find{ |e| e['@set'] =~ /reference/ }['@set'].split(' ')
+      .find{ |e| e['@set'] =~ /reference/ }['@set'].split(' ').reject{ |t| t =~ /reference/ }
 
     raise "Targets have similar names." unless targets.size == targets.map(&:downcase).uniq.size
 

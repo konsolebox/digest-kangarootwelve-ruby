@@ -18,8 +18,8 @@ This gem can be configured to compile differently based on the target specified.
 
 The current target implementations are `armv6`, `armv6m`, `armv7a`, `armv7m`,
 `armv8a`, `avr8`, `avx`, `avx2`, `avx2noasm`, `avx512`, `avx512noasm`,
-`compact`, `generic32`, `generic32lc`, `generic64`, `generic64lc`, `reference`,
-`reference32bits`, `ssse3`, and `xop`, with `compact` being the default target.
+`compact`, `generic32`, `generic32lc`, `generic64`, `generic64lc`,  `ssse3`, and
+`xop`, with `compact` being the default target.
 
 Details on what architectures these targets support are provided in the
 [README.markdown](https://github.com/XKCP/XKCP/blob/master/README.markdown) file
